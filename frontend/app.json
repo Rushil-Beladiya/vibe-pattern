@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "vibe_pattern",
+    "slug": "vibe_pattern",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/images.jpeg",
+    "scheme": "vibepattern",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/images/images.jpeg",
+        "backgroundImage": "./assets/images/images.jpeg",
+        "monochromeImage": "./assets/images/images.jpeg"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.rushilbeladiya.vibe_pattern"
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/images.jpeg"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/images.jpeg",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "backgroundColor": "#000000"
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
