@@ -1,105 +1,57 @@
-import { api, sendRequest } from "@/src/lib/api";
+import { useAuth } from "@/src/context/AuthContext";
+import { colors } from "@/src/theme";
 import { router } from "expo-router";
-import React, { useLayoutEffect, useState } from "react";
-import {
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type Field = {
-  key: string;
-  label: string;
-  type: string;
-  options: string[];
-};
-
-type Form = {
-  id: number;
-  name: string;
-  screen: string;
-  fields: Field[];
-  created_at: string;
-  updated_at: string;
-  submissions_count: number;
-};
-
 export default function DashBoardScreen() {
-  const [forms, setForms] = useState<Form[]>([]);
+  const { user, logout } = useAuth();
 
-  useLayoutEffect(() => {
-    fetchAllForms();
-  }, []);
-
-  const handleAddPress = () => {
-    router.push("/(superadmin)/formcreateupdate");
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/(auth)/login");
   };
-
-  const fetchAllForms = async () => {
-    try {
-      const response = await sendRequest({
-        url: api.getallForms(),
-        method: "get",
-      });
-
-      if (response.success && response.data) {
-        setForms(response.data as Form[]);
-      }
-    } catch (error) {
-      console.error("Error fetching forms:", error);
-    }
-  };
-
-  const renderField = (field: Field, index: number) => (
-    <View key={index} style={styles.fieldBox}>
-      <Text style={styles.fieldText}>
-        <Text style={styles.bold}>Label :</Text> {field.label}
-      </Text>
-
-      <Text style={styles.fieldText}>
-        <Text style={styles.bold}>Type :</Text> {field.type}
-      </Text>
-
-      {field.options?.length > 0 && (
-        <Text style={styles.fieldText}>
-          <Text style={styles.bold}>Options :</Text> {field.options.join(", ")}
-        </Text>
-      )}
-    </View>
-  );
-
-  const renderForm = ({ item }: { item: Form }) => (
-    <View style={styles.card}>
-      <Text style={styles.formTitle}>{item.name}</Text>
-
-      <Text style={styles.meta}>Screen : {item.screen}</Text>
-      <Text style={styles.meta}>Submissions : {item.submissions_count}</Text>
-
-      <Text style={styles.section}>Fields</Text>
-
-      {item.fields.map(renderField)}
-    </View>
-  );
 
   return (
     <SafeAreaView style={styles.container}>
-      <RefreshControl refreshing={false} onRefresh={fetchAllForms} />
-      <Text style={styles.header}>Form Templates</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Super Admin Dashboard</Text>
+        <Text style={styles.headerSubtitle}>Welcome, {user?.name}</Text>
+      </View>
 
-      <FlatList<Form>
-        data={forms}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderForm}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      />
+      <View style={styles.content}>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => router.push("/(superadmin)/screenmanagement")}
+        >
+          <Text style={styles.cardIcon}>📱</Text>
+          <Text style={styles.cardTitle}>Screen Management</Text>
+          <Text style={styles.cardDescription}>
+            Create and manage dynamic screens for your app
+          </Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.fab} onPress={handleAddPress}>
-        <Text style={styles.fabIcon}>+</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => router.push("/(superadmin)/formmanagement")}
+        >
+          <Text style={styles.cardIcon}>📋</Text>
+          <Text style={styles.cardTitle}>Form Management</Text>
+          <Text style={styles.cardDescription}>
+            Create and manage dynamic forms with custom fields
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.card, styles.logoutCard]}
+          onPress={handleLogout}
+        >
+          <Text style={styles.cardIcon}>🚪</Text>
+          <Text style={styles.cardTitle}>Logout</Text>
+          <Text style={styles.cardDescription}>Sign out from your account</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -107,61 +59,57 @@ export default function DashBoardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
-    padding: 12,
+    backgroundColor: colors.background,
   },
   header: {
-    fontSize: 20,
-    fontWeight: "600",
-    textAlign: "center",
-    marginBottom: 12,
+    backgroundColor: colors.surface,
+    padding: 24,
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: colors.text,
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: colors.textSecondary,
+  },
+  content: {
+    flex: 1,
+    padding: 20,
   },
   card: {
-    backgroundColor: "#fff",
-    padding: 14,
-    borderRadius: 10,
+    backgroundColor: colors.surface,
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  cardIcon: {
+    fontSize: 48,
     marginBottom: 12,
-    elevation: 3,
   },
-  formTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#461053",
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: colors.text,
+    marginBottom: 8,
   },
-  meta: {
-    fontSize: 13,
-    color: "#444",
+  cardDescription: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 20,
   },
-  section: {
-    marginTop: 8,
-    fontWeight: "600",
-  },
-  fieldBox: {
-    padding: 8,
-    marginTop: 6,
-    backgroundColor: "#F0E9F7",
-    borderRadius: 6,
-  },
-  fieldText: {
-    fontSize: 13,
-  },
-  bold: {
-    fontWeight: "600",
-  },
-  fab: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#461053",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 5,
-  },
-  fabIcon: {
-    fontSize: 32,
-    color: "#fff",
+  logoutCard: {
+    borderWidth: 2,
+    borderColor: "#ef4444",
   },
 });
