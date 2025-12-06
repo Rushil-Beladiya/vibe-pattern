@@ -1,15 +1,14 @@
 <?php
-namespace App\Enums;
 
-use App\Enums\InteractWithEnum;
+declare(strict_types=1);
+
+namespace App\Enums;
 
 enum ScreenType: string
 {
-
     use InteractWithEnum;
 
-    case Home = "home";
-    case Vibro = "vibro";
-    case Profile = "profile";
+    case Home = 'home';
+    case Vibro = 'vibro';
+    case Profile = 'profile';
 }
-?>

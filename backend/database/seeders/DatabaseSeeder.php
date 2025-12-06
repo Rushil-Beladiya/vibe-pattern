@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Enums\RoleType;
@@ -8,7 +10,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class DatabaseSeeder extends Seeder
+final class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
@@ -39,7 +41,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
-            ScreenAndFormSeeder::class
+            ScreenAndFormSeeder::class,
         ]);
     }
 }

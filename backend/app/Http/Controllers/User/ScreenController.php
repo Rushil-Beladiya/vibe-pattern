@@ -1,12 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\User;
 
-use App\Http\Controllers\Controller;
 use App\Models\Screen;
-use Illuminate\Http\Request;
 
-class ScreenController extends Controller
+final class ScreenController 
 {
     /**
      * Display all active screens for user (for bottom tab bar)
@@ -17,7 +17,7 @@ class ScreenController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $screens
+            'data' => $screens,
         ]);
     }
 
@@ -28,10 +28,10 @@ class ScreenController extends Controller
     {
         $screen = Screen::where('slug', $slug)->where('is_active', true)->first();
 
-        if (!$screen) {
+        if (! $screen) {
             return response()->json([
                 'success' => false,
-                'message' => 'Screen not found'
+                'message' => 'Screen not found',
             ], 404);
         }
 
@@ -41,8 +41,8 @@ class ScreenController extends Controller
             'success' => true,
             'data' => [
                 'screen' => $screen,
-                'forms' => $forms
-            ]
+                'forms' => $forms,
+            ],
         ]);
     }
 }

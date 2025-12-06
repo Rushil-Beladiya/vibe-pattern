@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -9,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class FormSubmissionController extends Controller
+final class FormSubmissionController  
 {
     public function store(Request $request): JsonResponse
     {
@@ -51,11 +53,13 @@ class FormSubmissionController extends Controller
                 /** @var \Illuminate\Filesystem\FilesystemAdapter $publicDisk */
                 $publicDisk = Storage::disk('public');
                 $payload[$key] = $publicDisk->url($path);
+
                 continue;
             }
 
             if ($type === 'checkbox') {
                 $payload[$key] = (bool) $value;
+
                 continue;
             }
 
@@ -79,4 +83,3 @@ class FormSubmissionController extends Controller
         ], 201);
     }
 }
-

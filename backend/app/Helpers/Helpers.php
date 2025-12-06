@@ -1,12 +1,10 @@
 <?php
 
+declare(strict_types=1);
 
-if (!function_exists('formatValidationErrors')) {
+if (! function_exists('formatValidationErrors')) {
     /**
      * Format a given errors array with key value pair.
-     *
-     * @param array $errors
-     * @return array
      */
     function formatValidationErrors(array $errors): array
     {
@@ -14,6 +12,7 @@ if (!function_exists('formatValidationErrors')) {
             ->mapWithKeys(function ($messages, $field) {
                 $parts = explode('.', $field);
                 $simpleField = end($parts);
+
                 return [$simpleField => $messages[0]];
             })
             ->toArray();

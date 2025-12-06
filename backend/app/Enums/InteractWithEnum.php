@@ -1,30 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enums;
 
 trait InteractWithEnum
 {
     /**
      * Find ENUM by name or value
-     *
-     * @param mixed $needle
-     *
-     * @return static|null
      */
-    public static function find(mixed $needle): static|null
+    public static function find(mixed $needle): ?static
     {
-        if (in_array($needle, static::names()))
+        if (in_array($needle, static::names())) {
             return constant("static::$needle");
-        if (in_array($needle, static::values()))
+        }
+        if (in_array($needle, static::values())) {
             return static::tryFrom($needle);
+        }
 
         return null;
     }
 
     /**
      * Get all ENUM names
-     *
-     * @return array
      */
     public static function names(): array
     {
@@ -33,8 +31,6 @@ trait InteractWithEnum
 
     /**
      * Get all ENUM values
-     *
-     * @return array
      */
     public static function values(): array
     {
@@ -43,8 +39,6 @@ trait InteractWithEnum
 
     /**
      * Get all ENUM value => name
-     *
-     * @return array
      */
     public static function array(): array
     {
@@ -53,8 +47,6 @@ trait InteractWithEnum
 
     /**
      * Get all ENUM Array name => value
-     *
-     * @return array
      */
     public static function enumArray(): array
     {
@@ -63,8 +55,6 @@ trait InteractWithEnum
 
     /**
      * Get ENUM value in string
-     * 
-     * @return string
      */
     public function toString(): string
     {

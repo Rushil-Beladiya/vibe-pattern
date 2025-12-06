@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\FormSubmission;
 use Illuminate\Http\JsonResponse;
 
-class UserFormController extends Controller
+final class UserFormController  
 {
     public function show(FormSubmission $formSubmission): JsonResponse
     {
@@ -24,4 +26,3 @@ class UserFormController extends Controller
         ]);
     }
 }
-

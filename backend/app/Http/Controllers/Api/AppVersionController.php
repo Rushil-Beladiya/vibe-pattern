@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 
-class AppVersionController extends Controller
+final class AppVersionController  
 {
     /**
      * Get the current app version requirements.

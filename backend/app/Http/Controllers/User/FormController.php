@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Form;
-use Illuminate\Http\Request;
 
-class FormController extends Controller
+final class FormController  
 {
     /**
      * Display the specified form with field values
@@ -17,7 +18,7 @@ class FormController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $form
+            'data' => $form,
         ]);
     }
 }

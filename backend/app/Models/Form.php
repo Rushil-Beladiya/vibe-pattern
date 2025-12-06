@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Form extends Model
+final class Form extends Model
 {
     use HasFactory;
 
@@ -63,11 +65,12 @@ class Form extends Model
     {
         $fields = $this->fields;
         foreach ($fields as &$field) {
-            if (!isset($field['value'])) {
+            if (! isset($field['value'])) {
                 $field['value'] = '';
             }
         }
         $this->fields = $fields;
+
         return $this;
     }
 
@@ -77,10 +80,10 @@ class Form extends Model
     public function updateFieldValues(array $data, array $files = [])
     {
         $fields = $this->fields;
-        
+
         foreach ($fields as &$field) {
             $key = $field['key'];
-            
+
             // Handle file/image uploads
             if (in_array($field['type'], ['file', 'image']) && isset($files[$key])) {
                 $field['value'] = $files[$key];
@@ -90,8 +93,9 @@ class Form extends Model
                 $field['value'] = $data[$key];
             }
         }
-        
+
         $this->fields = $fields;
+
         return $this;
     }
 }

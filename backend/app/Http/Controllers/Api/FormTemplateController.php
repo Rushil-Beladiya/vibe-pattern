@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Enums\ScreenType;
@@ -14,7 +16,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
-class FormTemplateController extends Controller
+final class FormTemplateController  
 {
     private const ALLOWED_TYPES = ['text', 'number', 'textarea', 'email', 'checkbox', 'select', 'image', 'file'];
 

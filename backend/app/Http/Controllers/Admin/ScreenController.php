@@ -1,12 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Screen;
-use Illuminate\Http\Request;
 
-class ScreenController extends Controller
+final class ScreenController 
 {
     /**
      * Display all active screens for admin
@@ -16,9 +16,9 @@ class ScreenController extends Controller
         $screens = Screen::active()->ordered()->get();
 
         return response()->json([
-            'success' => true,
-            'data' => $screens
-        ]);
+            'message' => 'Screens retrieved successfully',
+            'data' => $screens,
+        ], 200);
     }
 
     /**
@@ -29,8 +29,8 @@ class ScreenController extends Controller
         $forms = $screen->activeForms()->get();
 
         return response()->json([
-            'success' => true,
-            'data' => $forms
-        ]);
+            'message' => 'Forms retrieved successfully',
+            'data' => $forms,
+        ], 200);
     }
 }

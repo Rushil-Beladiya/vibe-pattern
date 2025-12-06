@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use App\Models\Screen;
 use App\Models\Form;
+use App\Models\Screen;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class ScreenAndFormSeeder extends Seeder
+final class ScreenAndFormSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,8 +18,9 @@ class ScreenAndFormSeeder extends Seeder
     {
         $superAdmin = User::where('role_id', '1')->first();
 
-        if (!$superAdmin) {
+        if (! $superAdmin) {
             $this->command->error('Super admin user not found! Please run the main seeder first.');
+
             return;
         }
 
