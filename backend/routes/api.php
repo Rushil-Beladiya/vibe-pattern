@@ -9,27 +9,27 @@ use App\Http\Controllers\User\ScreenController as UserScreenController;
 use App\Http\Controllers\User\FormController as UserFormController;
 use Illuminate\Support\Facades\Route;
 
-// ========================================
-// AUTH ROUTES (PUBLIC)
-// ========================================
-Route::prefix('auth')->group(function () {
-    Route::post('/login', [AuthController::class, 'login']);
-    
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::get('/me', [AuthController::class, 'me']);
-    });
-});
+Route::name('api.')->group(function () {
 
-// ========================================
-// SUPER ADMIN ROUTES
-// ========================================
-Route::middleware(['auth:sanctum', 'role:super_admin'])->prefix('admin')->group(function () {
+ Route::get('app-version', [AuthController::class, 'getAppVersionRequirements']);
+
+    Route::middleware('guest')->controller(AuthController::class)->group(function () {
+        Route::post('/register', 'register');
+        Route::post('/login', 'login');
+    });
+
+    Route::middleware('auth:sanctum')->controller(AuthController::class)->group(function () {
+        Route::post('/logout', 'logout');
+        Route::get('/user', 'user');
+    });
+
+
+Route::middleware(['auth:sanctum'])->group(function () {
     
-    // Screen Management
     Route::apiResource('screens', SuperAdminScreenController::class);
     
-    // Form Management
+    Route::get('/forms', [SuperAdminFormController::class, 'getAllForms']);
+    
     Route::prefix('screens/{screen}')->group(function () {
         Route::get('/forms', [SuperAdminFormController::class, 'index']);
         Route::post('/forms', [SuperAdminFormController::class, 'store']);
@@ -42,10 +42,7 @@ Route::middleware(['auth:sanctum', 'role:super_admin'])->prefix('admin')->group(
     });
 });
 
-// ========================================
-// ADMIN ROUTES (FORM FILLING)
-// ========================================
-Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
     
     // Get all active screens
     Route::get('/screens', [AdminScreenController::class, 'index']);
@@ -58,9 +55,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::post('/forms/{form}/submit', [AdminFormController::class, 'submit']);
 });
 
-// ========================================
-// USER ROUTES (VIEW DATA)
-// ========================================
 Route::middleware(['auth:sanctum', 'role:user'])->prefix('user')->group(function () {
     
     // Get all active screens (for bottom tab bar)
@@ -71,4 +65,5 @@ Route::middleware(['auth:sanctum', 'role:user'])->prefix('user')->group(function
     
     // Get form detail
     Route::get('/forms/{form}', [UserFormController::class, 'show']);
+});
 });

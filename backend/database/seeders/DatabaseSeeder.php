@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
-            FormTemplateSeeder::class,
+            ScreenAndFormSeeder::class
         ]);
     }
 }

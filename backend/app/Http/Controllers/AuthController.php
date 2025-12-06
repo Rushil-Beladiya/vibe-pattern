@@ -38,7 +38,7 @@ class AuthController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'role' => $user->role,
+                    'role_id' => $user->role_id,
                 ],
                 'token' => $token,
             ]
@@ -72,6 +72,18 @@ class AuthController extends Controller
                     'email' => $request->user()->email,
                     'role' => $request->user()->role,
                 ]
+            ]
+        ]);
+    }
+     public function getAppVersionRequirements()
+    {
+        return response()->json([
+            'responseCode' => 1,
+            'responseText' => 'App version requirements retrieved successfully.',
+            'responseData' => [
+                'min_android_version' => config('app_version.min_android_version'),
+                'min_ios_version' => config('app_version.min_ios_version'),
+                'last_updated' => now()->toDateTimeString(),
             ]
         ]);
     }

@@ -84,20 +84,21 @@ This will create sample screens (Music, Vibro, Profile) and sample forms with va
 **Screens:**
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/admin/screens` | Get all screens |
-| POST | `/api/admin/screens` | Create new screen |
-| GET | `/api/admin/screens/{id}` | Get screen detail |
-| PUT | `/api/admin/screens/{id}` | Update screen |
-| DELETE | `/api/admin/screens/{id}` | Delete screen |
+| GET | `/api/screens` | Get all screens |
+| POST | `/api/screens` | Create new screen |
+| GET | `/api/screens/{id}` | Get screen detail |
+| PUT | `/api/screens/{id}` | Update screen |
+| DELETE | `/api/screens/{id}` | Delete screen |
 
 **Forms:**
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/admin/screens/{screen_id}/forms` | Get forms by screen |
-| POST | `/api/admin/screens/{screen_id}/forms` | Create form for screen |
-| GET | `/api/admin/forms/{id}` | Get form detail |
-| PUT | `/api/admin/forms/{id}` | Update form |
-| DELETE | `/api/admin/forms/{id}` | Delete form |
+| GET | `/api/forms` | Get all forms (dashboard) |
+| GET | `/api/screens/{screen_id}/forms` | Get forms by screen |
+| POST | `/api/screens/{screen_id}/forms` | Create form for screen |
+| GET | `/api/forms/{id}` | Get form detail |
+| PUT | `/api/forms/{id}` | Update form |
+| DELETE | `/api/forms/{id}` | Delete form |
 
 ### Admin Routes (Form Filling)
 

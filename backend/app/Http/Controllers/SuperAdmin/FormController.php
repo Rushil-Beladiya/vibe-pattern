@@ -10,6 +10,21 @@ use Illuminate\Http\Request;
 class FormController extends Controller
 {
     /**
+     * Display all forms for super admin dashboard
+     */
+    public function getAllForms()
+    {
+        $forms = Form::with('screen:id,name', 'creator:id,name')
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $forms
+        ]);
+    }
+
+    /**
      * Display forms for a specific screen
      */
     public function index(Screen $screen)

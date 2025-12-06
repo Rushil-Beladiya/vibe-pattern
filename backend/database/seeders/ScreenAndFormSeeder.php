@@ -14,7 +14,7 @@ class ScreenAndFormSeeder extends Seeder
      */
     public function run(): void
     {
-        $superAdmin = User::where('role', 'super_admin')->first();
+        $superAdmin = User::where('role_id', '1')->first();
 
         if (!$superAdmin) {
             $this->command->error('Super admin user not found! Please run the main seeder first.');
