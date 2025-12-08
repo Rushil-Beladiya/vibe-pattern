@@ -1,5 +1,6 @@
-import { useAuth } from "@/src/context/AuthContext";
+import { useUser } from "@/src/context";
 import { sendRequest } from "@/src/lib/api";
+import { getStoreValue } from "@/src/utils/storage";
 import { useRouter } from "expo-router";
 import { useLayoutEffect } from "react";
 import { Platform, View } from "react-native";
@@ -28,7 +29,7 @@ const compareVersions = (
 
 export default function Index() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { userRole } = useUser();
 
   const handleCheckAppVersion = async () => {
     const response = await sendRequest({
@@ -64,20 +65,19 @@ export default function Index() {
       return;
     }
 
-    if (!isAuthenticated || !user) {
+    const token = await getStoreValue({ key: "token", type: "string" });
+    console.log("token -> ", token);
+
+    if (!token) {
       router.replace("/(auth)/login");
       return;
     }
 
-    // Navigate based on role
-    switch (user.role) {
-      case "super_admin":
+    switch (true) {
+      case userRole.superadmin:
         router.replace("/(superadmin)/dashboard");
         break;
-      case "admin":
-        router.replace("/(drawer)/(tabs)/home");
-        break;
-      case "user":
+      case userRole.admin:
         router.replace("/(drawer)/(tabs)/home");
         break;
       default:
@@ -86,10 +86,8 @@ export default function Index() {
   };
 
   useLayoutEffect(() => {
-    if (!isLoading) {
-      handleCheckAppVersion();
-    }
-  }, [isLoading, isAuthenticated]);
+    handleCheckAppVersion();
+  }, []);
 
   return <View />;
 }
