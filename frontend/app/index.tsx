@@ -87,8 +87,7 @@ export default function Index() {
       console.log("Navigating to superadmin dashboard");
       router.replace("/(superadmin)/dashboard");
     } else if (roleId === 2 || roleId === 3) {
-      console.log("Navigating to drawer tabs home");
-      router.replace("/(drawer)/(tabs)/home");
+      router.replace("/(drawer)/(tabs)/music");
     } else {
       console.log("Unknown role, redirecting to login");
       router.replace("/(auth)/login");

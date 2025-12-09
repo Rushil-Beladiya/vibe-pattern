@@ -1,0 +1,1 @@
+export { VibrationScreen } from "./VibrationScreen";

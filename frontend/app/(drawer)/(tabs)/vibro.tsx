@@ -1,3 +1,6 @@
+import { useUser } from "@/src/context";
+import { VibrationScreen } from "@/src/features/tab/screens/vibration/VibrationScreen";
+import { useLocalSearchParams } from "expo-router";
 import { ActionButtons } from "@/src/components/vibro/ActionButtons";
 import { PatternGridModal } from "@/src/components/vibro/PatternGridModal";
 import { PatternSelector } from "@/src/components/vibro/PatternSelector";
@@ -7,7 +10,8 @@ import { getVibrationPatterns } from "@/src/services/loadPatterns";
 import React, { useCallback, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-export default function VibroScreen() {
+// Original Vibro Screen Component
+function VibroScreenContent() {
   const patterns = getVibrationPatterns();
   const [selIdx, setSelIdx] = useState(0);
   const [speed, setSpeed] = useState(1);
@@ -94,6 +98,19 @@ export default function VibroScreen() {
         onSelectPattern={selectFromGrid}
       />
     </View>
+  );
+}
+
+export default function VibroTabScreen() {
+  const { userRole } = useUser();
+  const params = useLocalSearchParams();
+  const screen_id = params.screen_id as string;
+
+  // Admin sees dynamic data from backend, User sees vibro functionality
+  return userRole.admin ? (
+    <VibrationScreen screen_id={screen_id} />
+  ) : (
+    <VibroScreenContent />
   );
 }
 

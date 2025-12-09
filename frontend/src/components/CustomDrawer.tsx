@@ -1,5 +1,5 @@
 import { usePathname, useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,10 +9,10 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
-import { drawerMenuItems } from "../constants/menu";
 import { useUser } from "../context";
 import { colors, spacing, typography } from "../theme";
 import { useDrawer } from "./DrawerContext";
+import { fetchScreens, type ScreenItem } from "../services/screens";
 
 const DRAWER_WIDTH = 320;
 
@@ -21,9 +21,22 @@ export const CustomDrawer = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { logout } = useUser();
-  const handleNav = (route: string) => {
+  const [menuItems, setMenuItems] = useState<ScreenItem[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const data = await fetchScreens({ type: "sidedrawer" });
+      if (mounted) setMenuItems(data);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+  const handleNav = (route: string, screenId?: number) => {
     closeDrawer();
-    router.replace(route as any);
+    const path = screenId ? `${route}?screen_id=${screenId}` : route;
+    router.replace(path as any);
   };
 
   const handellogout = async () => {
@@ -49,24 +62,22 @@ export const CustomDrawer = () => {
           </View>
 
           <View style={styles.menuContainer}>
-            {drawerMenuItems.map((item, idx) => {
-              const isActive = pathname.includes(
-                item.route.split("/").pop() || ""
-              );
+            {menuItems.map((item, idx) => {
+              const isActive = pathname.includes(item.route);
               return (
                 <TouchableOpacity
                   key={idx}
                   style={[styles.menuItem, isActive && styles.menuItemActive]}
-                  onPress={() => handleNav(item.route)}
+                  onPress={() => handleNav(`/(drawer)/${item.route}`, item.id)}
                 >
-                  <Text style={styles.menuIcon}>{item.icon}</Text>
+                  <Text style={styles.menuIcon}>{item.icon || "📄"}</Text>
                   <Text
                     style={[
                       styles.menuLabel,
                       isActive && styles.menuLabelActive,
                     ]}
                   >
-                    {item.label}
+                    {item.title}
                   </Text>
                 </TouchableOpacity>
               );

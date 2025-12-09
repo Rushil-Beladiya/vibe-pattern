@@ -3,6 +3,9 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { colors } from "../../src/theme/colors";
 import { spacing } from "../../src/theme/spacing";
 import { typography } from "../../src/theme/typography";
+import { useUser } from "@/src/context";
+import { AdminHomeScreen } from "@/src/features/tab/screens/home";
+import { useLocalSearchParams } from "expo-router";
 
 const faqs = [
   {
@@ -16,7 +19,7 @@ const faqs = [
   { q: "Can I customize themes?", a: "Yes! Edit files in src/theme/ folder." },
 ];
 
-export default function HelpScreen() {
+function HelpScreenContent() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
@@ -29,6 +32,18 @@ export default function HelpScreen() {
         ))}
       </View>
     </ScrollView>
+  );
+}
+
+export default function HelpScreen() {
+  const { userRole } = useUser();
+  const params = useLocalSearchParams();
+  const screen_id = params.screen_id as string;
+
+  return userRole.admin ? (
+    <AdminHomeScreen screen_id={screen_id} />
+  ) : (
+    <HelpScreenContent />
   );
 }
 

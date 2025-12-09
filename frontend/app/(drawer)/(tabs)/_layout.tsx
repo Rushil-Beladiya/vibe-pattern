@@ -1,18 +1,33 @@
 import { Tabs } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
 
 import CustomHeader from "@/src/components/CustomHeader";
 import { useDrawer } from "@/src/components/DrawerContext";
 import { TabBar } from "@/src/components/TabBar";
 import { colors } from "../../../src/theme/colors";
 import { spacing } from "../../../src/theme/spacing";
+import { fetchScreens, ScreenItem } from "@/src/services/screens";
 
 export default function TabsLayout() {
   const { toggleDrawer } = useDrawer();
 
+  const [screens, setScreens] = useState<ScreenItem[] | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const data = await fetchScreens({ type: "bottom" });
+      if (mounted && data && data.length) setScreens(data);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <Tabs
-      tabBar={(props) => <TabBar {...props} />}
+      tabBar={(props) => <TabBar {...props} screens={screens || undefined} />}
       screenOptions={{
         headerStyle: { backgroundColor: colors.surface },
         headerTintColor: colors.text,
@@ -23,24 +38,17 @@ export default function TabsLayout() {
         ),
       }}
     >
-      <Tabs.Screen
-        name="home"
-        options={{ title: "Home", header: () => <CustomHeader title="Home" /> }}
-      />
-      <Tabs.Screen
-        name="vibro"
-        options={{
-          title: "vibro",
-          header: () => <CustomHeader title="Vibro" />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          header: () => <CustomHeader title="Profile" />,
-        }}
-      />
+      {(screens || []).map((s) => (
+        <Tabs.Screen
+          key={s.route}
+          name={s.route}
+          options={{
+            title: s.title,
+            header: () => <CustomHeader title={s.title} />,
+          }}
+          initialParams={{ screen_id: s.id }}
+        />
+      ))}
     </Tabs>
   );
 }

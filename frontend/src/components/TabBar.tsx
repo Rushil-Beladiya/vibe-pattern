@@ -1,21 +1,22 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { tabItems } from "../constants/menu";
 import { colors, spacing } from "../theme";
+import type { ScreenItem } from "../services/screens";
 
 type TabBarProps = {
   state: any;
   descriptors: any;
   navigation: any;
+  screens?: ScreenItem[];
 };
 
-export const TabBar = ({ state, descriptors, navigation }: TabBarProps) => {
+export const TabBar = ({ state, descriptors, navigation, screens }: TabBarProps) => {
   return (
     <View style={styles.container}>
       {state.routes.map((route: any, idx: number) => {
         const { options } = descriptors[route.key];
         const isFocused = state.index === idx;
-        const tab = tabItems.find((t) => t.name === route.name);
+        const tab = screens?.find((t) => t.route === route.name);
 
         const onPress = () => {
           const event = navigation.emit({
@@ -40,7 +41,7 @@ export const TabBar = ({ state, descriptors, navigation }: TabBarProps) => {
               {tab?.icon}
             </Text>
             <Text style={[styles.label, isFocused && styles.labelActive]}>
-              {tab?.label || route.name}
+              {tab?.title || options.title || route.name}
             </Text>
           </TouchableOpacity>
         );

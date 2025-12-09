@@ -94,11 +94,27 @@ export const sendRequest = async ({
       data,
       headers,
     };
-    console.log("Request Config -> ", requestConfig);
+
+    console.log("🚀 API Request Started", {
+      method: method.toUpperCase(),
+      endpoint: requestConfig.url,
+      baseURL: apiUrl,
+      timestamp: new Date().toISOString(),
+    });
+
+    if (data) {
+      console.log(`📦 Request Data:`, data);
+    }
 
     const response = await apiClient.request(requestConfig);
 
-    console.log("response from api -> ", response);
+    console.log("✅ API Response Success", {
+      status: response?.status,
+      statusText: response?.statusText,
+      endpoint: requestConfig.url,
+      data: response.data,
+    });
+
     // Successful response
     if (response?.status === 200 || response?.status === 201) {
       return {
@@ -116,6 +132,17 @@ export const sendRequest = async ({
     };
   } catch (error: any) {
     const errorData = error?.response?.data || {};
+    const status = error?.response?.status;
+
+    console.error("❌ API Request Failed", {
+      status: status,
+      statusText: error?.response?.statusText,
+      endpoint: error?.config?.url,
+      error_message: errorData?.message || error?.message,
+      errors: errorData?.errors || {},
+      timestamp: new Date().toISOString(),
+    });
+
     handleError(errorData);
     return {
       success: false,

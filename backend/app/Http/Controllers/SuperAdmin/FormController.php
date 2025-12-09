@@ -49,12 +49,9 @@ final class FormController
             if (!isset($field['key']) || empty($field['key'])) {
                 $field['key'] = strtolower(preg_replace('/\s+/', '_', $field['label']));
             }
-        }
-
-        // Initialize empty values for all fields
-        foreach ($validated['fields'] as &$field) {
-            if (! isset($field['value'])) {
-                $field['value'] = '';
+            // Ensure value is set (nullable, so can be empty string or null)
+            if (!isset($field['value'])) {
+                $field['value'] = null;
             }
         }
 
@@ -103,21 +100,25 @@ final class FormController
             'is_active' => 'nullable|boolean',
         ]);
 
-        $form->update($validated);
-
         // Auto-generate keys for fields if not provided
         if (isset($validated['fields'])) {
             foreach ($validated['fields'] as &$field) {
                 if (!isset($field['key']) || empty($field['key'])) {
                     $field['key'] = strtolower(preg_replace('/\s+/', '_', $field['label']));
                 }
+                // Ensure value is set
+                if (!isset($field['value'])) {
+                    $field['value'] = null;
+                }
             }
         }
+
+        $form->update($validated);
 
         return response()->json([
             'message' => 'Form updated successfully',
             'data' => $form->load('screen'),
-        ],200);
+        ], 200);
     }
 
     /**

@@ -1,4 +1,10 @@
-import React, { FC, useEffect, useState, useCallback } from "react";
+import React, {
+  FC,
+  useEffect,
+  useState,
+  useCallback,
+  useLayoutEffect,
+} from "react";
 import {
   StyleSheet,
   Text,
@@ -8,26 +14,20 @@ import {
   Button,
   RefreshControl,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
 import {
-  fetchFormData,
-  submitFormData,
-  type FormData,
-} from "@/src/services/formService";
+  fetchMusicData,
+  submitMusicData,
+  type MusicData,
+} from "@/src/services/musicService";
 import FormRenderer from "@/src/features/tab/components/FormRenderer";
 import { colors, spacing, typography } from "@/src/theme";
 
-interface AdminHomeScreenProps {
+interface MusicScreenProps {
   screen_id?: string;
 }
 
-export const AdminHomeScreen: FC<AdminHomeScreenProps> = ({
-  screen_id: propScreenId,
-}) => {
-  const params = useLocalSearchParams();
-  const screen_id = propScreenId || (params.screen_id as string);
-
-  const [data, setData] = useState<FormData | null>(null);
+export const MusicScreen: FC<MusicScreenProps> = ({ screen_id }) => {
+  const [data, setData] = useState<MusicData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -42,7 +42,7 @@ export const AdminHomeScreen: FC<AdminHomeScreenProps> = ({
     try {
       setLoading(true);
       setError(null);
-      const fetchedData = await fetchFormData(screen_id);
+      const fetchedData = await fetchMusicData(screen_id);
 
       if (fetchedData) {
         setData(fetchedData);
@@ -50,16 +50,16 @@ export const AdminHomeScreen: FC<AdminHomeScreenProps> = ({
         setError("No data found for this screen");
       }
     } catch (err) {
-      setError("Failed to load screen data");
-      console.error("AdminHomeScreen error:", err);
+      setError("Failed to load music data");
+      console.error("MusicScreen error:", err);
     } finally {
       setLoading(false);
     }
   }, [screen_id]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     loadData();
-  }, [loadData]);
+  }, []);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -71,7 +71,7 @@ export const AdminHomeScreen: FC<AdminHomeScreenProps> = ({
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Loading screen data...</Text>
+        <Text style={styles.loadingText}>Loading music data...</Text>
       </View>
     );
   }
@@ -94,18 +94,19 @@ export const AdminHomeScreen: FC<AdminHomeScreenProps> = ({
       }
     >
       <View style={styles.content}>
-        <Text style={styles.title}>Screen Data</Text>
+        <Text style={styles.title}>Music Screen</Text>
         <Text style={styles.subtitle}>Screen ID: {screen_id}</Text>
+
         {data && (
           <View style={styles.dataContainer}>
-            <Text style={styles.sectionTitle}>Form Information:</Text>
+            <Text style={styles.sectionTitle}>Music Information:</Text>
             <View style={styles.infoRow}>
-              <Text style={[styles.label, styles.darkLabel]}>ID:</Text>
+              <Text style={styles.label}>ID:</Text>
               <Text style={[styles.value, styles.darkValue]}>{data.id}</Text>
             </View>
             {data.title && (
               <View style={styles.infoRow}>
-                <Text style={[styles.label, styles.darkLabel]}>Title:</Text>
+                <Text style={styles.label}>Title:</Text>
                 <Text style={[styles.value, styles.darkValue]}>
                   {data.title}
                 </Text>
@@ -113,9 +114,7 @@ export const AdminHomeScreen: FC<AdminHomeScreenProps> = ({
             )}
             {data.description && (
               <View style={styles.infoRow}>
-                <Text style={[styles.label, styles.darkLabel]}>
-                  Description:
-                </Text>
+                <Text style={styles.label}>Description:</Text>
                 <Text style={[styles.value, styles.darkValue]}>
                   {data.description}
                 </Text>
@@ -126,16 +125,16 @@ export const AdminHomeScreen: FC<AdminHomeScreenProps> = ({
               fields={data.fields || []}
               onSubmit={async (values) => {
                 setLoading(true);
-                const res = await submitFormData(
+                const res = await submitMusicData(
                   data.id || screen_id || 0,
                   values,
                   data.fields || []
                 );
                 setLoading(false);
                 if (res.success) {
-                  alert(res.message || "Form submitted successfully");
+                  alert(res.message || "Submitted successfully");
                 } else {
-                  alert(res.message || "Failed to submit form");
+                  alert(res.message || "Submit failed");
                 }
               }}
             />
@@ -192,9 +191,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     padding: spacing.md,
     borderRadius: 8,
-  },
-  darkLabel: {
-    color: colors.black,
   },
   darkValue: {
     color: colors.black,

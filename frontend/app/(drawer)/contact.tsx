@@ -3,8 +3,11 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { colors } from "../../src/theme/colors";
 import { spacing } from "../../src/theme/spacing";
 import { typography } from "../../src/theme/typography";
+import { useUser } from "@/src/context";
+import { AdminHomeScreen } from "@/src/features/tab/screens/home";
+import { useLocalSearchParams } from "expo-router";
 
-export default function ContactScreen() {
+function ContactScreenContent() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -21,6 +24,18 @@ export default function ContactScreen() {
         </TouchableOpacity>
       </View>
     </View>
+  );
+}
+
+export default function ContactScreen() {
+  const { userRole } = useUser();
+  const params = useLocalSearchParams();
+  const screen_id = params.screen_id as string;
+
+  return userRole.admin ? (
+    <AdminHomeScreen screen_id={screen_id} />
+  ) : (
+    <ContactScreenContent />
   );
 }
 
