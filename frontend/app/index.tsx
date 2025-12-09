@@ -29,7 +29,7 @@ const compareVersions = (
 
 export default function Index() {
   const router = useRouter();
-  const { userRole } = useUser();
+  const { user, isLoading } = useUser();
 
   const handleCheckAppVersion = async () => {
     const response = await sendRequest({
@@ -40,6 +40,7 @@ export default function Index() {
 
     if (!response.success && !response.data) {
       router.replace("/(auth)/appversion");
+      return;
     }
 
     const currentAppVersion = "1.0.0";
@@ -68,26 +69,38 @@ export default function Index() {
     const token = await getStoreValue({ key: "token", type: "string" });
     console.log("token -> ", token);
 
-    if (!token) {
+    if (!token || !user) {
       router.replace("/(auth)/login");
       return;
     }
 
-    switch (true) {
-      case userRole.superadmin:
-        router.replace("/(superadmin)/dashboard");
-        break;
-      case userRole.admin:
-        router.replace("/(drawer)/(tabs)/home");
-        break;
-      default:
-        router.replace("/(auth)/login");
+    // Check role_id directly from user object
+    console.log("User role_id -> ", user.role_id);
+
+    // Convert to number if string
+    const roleId =
+      typeof user.role_id === "string"
+        ? parseInt(user.role_id, 10)
+        : user.role_id;
+
+    if (roleId === 1) {
+      console.log("Navigating to superadmin dashboard");
+      router.replace("/(superadmin)/dashboard");
+    } else if (roleId === 2 || roleId === 3) {
+      console.log("Navigating to drawer tabs home");
+      router.replace("/(drawer)/(tabs)/home");
+    } else {
+      console.log("Unknown role, redirecting to login");
+      router.replace("/(auth)/login");
     }
   };
 
   useLayoutEffect(() => {
-    handleCheckAppVersion();
-  }, []);
+    // Wait for user context to load
+    if (!isLoading) {
+      handleCheckAppVersion();
+    }
+  }, [isLoading, user]);
 
   return <View />;
 }

@@ -84,10 +84,17 @@ export const LoginScreen: FC<LoginScreenProps> = ({}) => {
         await setStoreValue({ key: "token", value: response.data.token });
         await setUser(userData);
 
-        const roleId = response.data.user.role_id;
+        // Convert role_id to number if it's a string
+        const roleId =
+          typeof response.data.user.role_id === "string"
+            ? parseInt(response.data.user.role_id, 10)
+            : response.data.user.role_id;
+
+        console.log("Login successful, role_id:", roleId);
+
         if (roleId === 1) {
           router.replace("/(superadmin)/dashboard");
-        } else if (roleId === 2) {
+        } else if (roleId === 2 || roleId === 3) {
           router.replace("/(drawer)/(tabs)/home");
         } else {
           router.replace("/(drawer)/(tabs)/home");

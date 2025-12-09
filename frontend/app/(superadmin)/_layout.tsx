@@ -11,6 +11,10 @@ export default function SuperAdminLayout() {
       }}
     >
       <Stack.Screen name="dashboard" />
+      <Stack.Screen name="formview" />
+      <Stack.Screen name="formedit" />
+      <Stack.Screen name="formcreate" />
+      <Stack.Screen name="screens" />
     </Stack>
   );
 }

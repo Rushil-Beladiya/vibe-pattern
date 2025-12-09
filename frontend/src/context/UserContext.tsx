@@ -22,7 +22,7 @@ interface UserRoleType {
 export interface User {
   id: string | number;
   email: string;
-  role_id: number; // 1 = superadmin, 2 = admin, 3 = user
+  role_id: number | string; // 1 = superadmin, 2 = admin, 3 = user (can be string or number)
   name: string;
   created_at: string;
   updated_at: string;
@@ -45,10 +45,13 @@ interface UserContextProps {
 const UserContext = createContext<UserContextProps | undefined>(undefined);
 
 // Helper to determine role
-const getUserRole = (role_id?: number): UserRoleType => {
-  if (role_id === 1) return { superadmin: true, admin: false, user: false };
-  if (role_id === 2) return { superadmin: false, admin: true, user: false };
-  if (role_id === 3) return { superadmin: false, admin: false, user: true };
+const getUserRole = (role_id?: number | string): UserRoleType => {
+  // Convert to number if string
+  const roleNum = typeof role_id === "string" ? parseInt(role_id, 10) : role_id;
+
+  if (roleNum === 1) return { superadmin: true, admin: false, user: false };
+  if (roleNum === 2) return { superadmin: false, admin: true, user: false };
+  if (roleNum === 3) return { superadmin: false, admin: false, user: true };
   return { superadmin: false, admin: false, user: false };
 };
 
@@ -117,10 +120,13 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
       if (userData) {
         await setStoreValue({ key: "user", value: userData });
         setUserState(userData);
-        setUserRole(getUserRole(userData.role_id));
+        const role = getUserRole(userData.role_id);
+        setUserRole(role);
         console.log(
-          "setUserRole -> ",
-          setUserRole(getUserRole(userData.role_id))
+          "User role set -> ",
+          role,
+          "for role_id:",
+          userData.role_id
         );
       } else {
         await clearUserData();

@@ -37,8 +37,15 @@ final class ScreenController
             'is_active' => 'nullable|in:true,false',
         ],[
             'name.unique'=> 'The screen name already exists.',
+            'sort_order.unique'=> 'The sort order must be unique.',
+            'sort_order.exists'=> 'The sort order already exists.',
         ]);
 
+        if (!isset($validated['sort_order'])) {
+            // Assign next available sort order
+            $maxSortOrder = Screen::max('sort_order');
+            $validated['sort_order'] = $maxSortOrder !== null ? $maxSortOrder + 1 : 1;
+        }
         // Auto-generate slug if not provided
         if (! isset($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['name']);
