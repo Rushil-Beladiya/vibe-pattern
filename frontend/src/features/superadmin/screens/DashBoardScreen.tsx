@@ -107,7 +107,7 @@ export default function DashBoardScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <CustomHeader title="Form Dashboard" />
+      <CustomHeader title="Form Dashboard" useCustomDrawer />
 
       <SafeAreaView style={styles.container}>
         <View style={styles.headerRow}>
@@ -115,7 +115,7 @@ export default function DashBoardScreen() {
             style={styles.screenBtn}
             onPress={handleScreensPress}
           >
-            <Text style={styles.screenBtnText}>📱 Manage Screens</Text>
+            <Text style={styles.screenBtnText}>Manage Screens</Text>
           </TouchableOpacity>
         </View>
 

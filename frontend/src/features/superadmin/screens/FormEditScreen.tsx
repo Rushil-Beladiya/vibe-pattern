@@ -12,6 +12,8 @@ import {
 import CustomHeader from "@/src/components/CustomHeader";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { sendRequest } from "@/src/lib/api";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Button } from "@/src/components/Button";
 
 type Field = {
   key: string;
@@ -92,7 +94,7 @@ export default function FormEditScreen() {
       label: field.label,
       type: field.type,
       placeholder: field.placeholder || "",
-      required: field.required || false,
+      required: !!field.required,
       options: field.options?.join(", ") || "",
     });
     setFieldModalVisible(true);
@@ -175,15 +177,22 @@ export default function FormEditScreen() {
 
     setLoading(true);
     try {
+      // Backend validation expects `required` as string 'true'/'false' (same as create flow).
+      const payloadFields = formData.fields.map((f) => ({
+        ...f,
+        required: f.required ? "true" : "false",
+      }));
+
       const response = await sendRequest({
         url: `super-admin/forms/${form.id}`,
         method: "patch",
         data: {
           name: formData.name,
-          fields: formData.fields,
+          fields: payloadFields,
           is_active: formData.is_active,
         },
       });
+      console.log("response update  -> ", response);
 
       if (response.success) {
         Alert.alert("Success", "Form updated successfully", [
@@ -275,27 +284,17 @@ export default function FormEditScreen() {
         {/* Active Toggle */}
         <View style={styles.toggleRow}>
           <Text style={styles.label}>Active</Text>
-          <View style={styles.toggleGroup}>
-            {[true, false].map((val) => (
-              <TouchableOpacity
-                key={String(val)}
-                style={[
-                  styles.toggleBtn,
-                  formData.is_active === val && styles.toggleBtnActive,
-                ]}
-                onPress={() => setFormData({ ...formData, is_active: val })}
-              >
-                <Text
-                  style={[
-                    styles.toggleBtnText,
-                    formData.is_active === val && styles.toggleBtnTextActive,
-                  ]}
-                >
-                  {val ? "Yes" : "No"}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <TouchableOpacity
+            style={[
+              styles.checkbox,
+              formData.is_active && styles.checkboxChecked,
+            ]}
+            onPress={() =>
+              setFormData({ ...formData, is_active: !formData.is_active })
+            }
+          >
+            {formData.is_active && <Text style={styles.checkboxTick}>✓</Text>}
+          </TouchableOpacity>
         </View>
 
         {/* Fields */}
@@ -334,157 +333,140 @@ export default function FormEditScreen() {
 
         {/* Action Buttons */}
         <View style={styles.buttonGroup}>
-          <TouchableOpacity
-            style={[styles.submitBtn, styles.deleteFormBtn]}
-            onPress={handleDeleteForm}
-            disabled={loading}
-          >
-            <Text style={styles.submitBtnText}>Delete Form</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.submitBtn, styles.updateBtn]}
+          <Button
+            type="action_with_cancel"
+            title="Update Form"
+            secondaryTitle="Delete"
             onPress={handleUpdateForm}
-            disabled={loading}
-          >
-            <Text style={[styles.submitBtnText, { color: "#fff" }]}>
-              {loading ? "Updating..." : "Update Form"}
-            </Text>
-          </TouchableOpacity>
+            onSecondaryPress={handleDeleteForm}
+            loading={loading}
+            primaryStyle={{
+              backgroundColor: "#461053",
+              borderColor: "#461053",
+            }}
+          />
         </View>
       </ScrollView>
 
-      {/* Field Editor Modal */}
       <Modal visible={fieldModalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                {editingFieldIndex !== null ? "Edit Field" : "Add Field"}
-              </Text>
-              <TouchableOpacity onPress={() => setFieldModalVisible(false)}>
-                <Text style={styles.closeBtn}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.modalBody}>
-              <Text style={styles.label}>Label *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. First Name"
-                value={fieldForm.label}
-                onChangeText={(text) =>
-                  setFieldForm({ ...fieldForm, label: text })
-                }
-              />
-
-              <Text style={styles.label}>Type *</Text>
-              <View style={styles.typeGrid}>
-                {[
-                  "text",
-                  "textarea",
-                  "select",
-                  "image",
-                  "file",
-                  "date",
-                  "checkbox",
-                ].map((type) => (
-                  <TouchableOpacity
-                    key={type}
-                    style={[
-                      styles.typeOption,
-                      fieldForm.type === type && styles.typeOptionActive,
-                    ]}
-                    onPress={() =>
-                      setFieldForm({
-                        ...fieldForm,
-                        type: type,
-                      })
-                    }
-                  >
-                    <Text
-                      style={[
-                        styles.typeOptionText,
-                        fieldForm.type === type && styles.typeOptionTextActive,
-                      ]}
-                    >
-                      {type}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+        <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>
+                  {editingFieldIndex !== null ? "Edit Field" : "Add Field"}
+                </Text>
+                <TouchableOpacity onPress={() => setFieldModalVisible(false)}>
+                  <Text style={styles.closeBtn}>✕</Text>
+                </TouchableOpacity>
               </View>
 
-              <Text style={styles.label}>Placeholder</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Enter your name"
-                value={fieldForm.placeholder}
-                onChangeText={(text) =>
-                  setFieldForm({ ...fieldForm, placeholder: text })
-                }
-              />
+              <ScrollView style={styles.modalBody}>
+                <Text style={styles.label}>Label *</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g. First Name"
+                  value={fieldForm.label}
+                  onChangeText={(text) =>
+                    setFieldForm({ ...fieldForm, label: text })
+                  }
+                />
 
-              {fieldForm.type === "select" && (
-                <>
-                  <Text style={styles.label}>Options (comma-separated)</Text>
-                  <TextInput
-                    style={[styles.input, { minHeight: 60 }]}
-                    placeholder="Option 1, Option 2, Option 3"
-                    value={fieldForm.options}
-                    onChangeText={(text) =>
-                      setFieldForm({ ...fieldForm, options: text })
-                    }
-                    multiline
-                  />
-                </>
-              )}
-
-              <View style={styles.toggleRow}>
-                <Text style={styles.label}>Required</Text>
-                <View style={styles.toggleGroup}>
-                  {[true, false].map((val) => (
+                <Text style={styles.label}>Type *</Text>
+                <View style={styles.typeGrid}>
+                  {[
+                    "text",
+                    "textarea",
+                    "select",
+                    "image",
+                    "file",
+                    "date",
+                    "checkbox",
+                  ].map((type) => (
                     <TouchableOpacity
-                      key={String(val)}
+                      key={type}
                       style={[
-                        styles.toggleBtn,
-                        fieldForm.required === val && styles.toggleBtnActive,
+                        styles.typeOption,
+                        fieldForm.type === type && styles.typeOptionActive,
                       ]}
                       onPress={() =>
-                        setFieldForm({ ...fieldForm, required: val })
+                        setFieldForm({
+                          ...fieldForm,
+                          type: type,
+                        })
                       }
                     >
                       <Text
                         style={[
-                          styles.toggleBtnText,
-                          fieldForm.required === val &&
-                            styles.toggleBtnTextActive,
+                          styles.typeOptionText,
+                          fieldForm.type === type &&
+                            styles.typeOptionTextActive,
                         ]}
                       >
-                        {val ? "Yes" : "No"}
+                        {type}
                       </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
-              </View>
-            </ScrollView>
 
-            <View style={styles.modalFooter}>
-              <TouchableOpacity
-                style={[styles.submitBtn, styles.cancelBtn]}
-                onPress={() => setFieldModalVisible(false)}
-              >
-                <Text style={styles.submitBtnText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.submitBtn, styles.updateBtn]}
-                onPress={saveField}
-              >
-                <Text style={[styles.submitBtnText, { color: "#fff" }]}>
-                  Save Field
-                </Text>
-              </TouchableOpacity>
+                <Text style={styles.label}>Placeholder</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g. Enter your name"
+                  value={fieldForm.placeholder}
+                  onChangeText={(text) =>
+                    setFieldForm({ ...fieldForm, placeholder: text })
+                  }
+                />
+
+                {fieldForm.type === "select" && (
+                  <>
+                    <Text style={styles.label}>Options (comma-separated)</Text>
+                    <TextInput
+                      style={[styles.input, { minHeight: 60 }]}
+                      placeholder="Option 1, Option 2, Option 3"
+                      value={fieldForm.options}
+                      onChangeText={(text) =>
+                        setFieldForm({ ...fieldForm, options: text })
+                      }
+                      multiline
+                    />
+                  </>
+                )}
+
+                <View style={styles.toggleRow}>
+                  <Text style={styles.label}>Required</Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.checkbox,
+                      fieldForm.required && styles.checkboxChecked,
+                    ]}
+                    onPress={() =>
+                      setFieldForm({
+                        ...fieldForm,
+                        required: !fieldForm.required,
+                      })
+                    }
+                  >
+                    {fieldForm.required && (
+                      <Text style={styles.checkboxTick}>✓</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+
+              <View style={styles.modalFooter}>
+                <Button
+                  type="action_with_cancel"
+                  title="Save"
+                  secondaryTitle="Cancel"
+                  onPress={saveField}
+                  onSecondaryPress={() => setFieldModalVisible(false)}
+                />
+              </View>
             </View>
           </View>
-        </View>
+        </SafeAreaView>
       </Modal>
     </View>
   );
@@ -517,18 +499,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  toggleGroup: { flexDirection: "row", gap: 8 },
-  toggleBtn: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 6,
-    paddingVertical: 8,
-    alignItems: "center",
-  },
-  toggleBtnActive: { backgroundColor: "#461053", borderColor: "#461053" },
-  toggleBtnText: { color: "#666", fontWeight: "600", fontSize: 12 },
-  toggleBtnTextActive: { color: "#fff" },
 
   fieldsSection: { marginTop: 16, marginBottom: 24 },
   sectionTitle: { fontSize: 16, fontWeight: "700", marginBottom: 12 },
@@ -564,11 +534,6 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingBottom: 20,
   },
-  submitBtn: { flex: 1, paddingVertical: 12, borderRadius: 8 },
-  cancelBtn: { backgroundColor: "#f0f0f0" },
-  updateBtn: { backgroundColor: "#461053" },
-  deleteFormBtn: { backgroundColor: "#d32f2f" },
-  submitBtnText: { textAlign: "center", fontWeight: "600", color: "#000" },
 
   // Modal
   modalOverlay: {
@@ -620,6 +585,18 @@ const styles = StyleSheet.create({
   typeOptionActive: { backgroundColor: "#461053", borderColor: "#461053" },
   typeOptionText: { color: "#666", fontWeight: "600", fontSize: 12 },
   typeOptionTextActive: { color: "#fff" },
+
+  checkbox: {
+    width: 26,
+    height: 26,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxChecked: { backgroundColor: "#461053", borderColor: "#461053" },
+  checkboxTick: { color: "#fff", fontWeight: "700" },
 
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   backBtn: {
