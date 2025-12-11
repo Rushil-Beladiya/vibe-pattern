@@ -24,11 +24,11 @@ final class ScreenAndFormSeeder extends Seeder
             return;
         }
 
-        // Create example screens
+        // Create example screens (prefer .png icons; fall back to .svg if .png missing)
         $musicScreen = Screen::create([
             'name' => 'Music',
             'slug' => 'music',
-            'icon' => '/storage/icons/musical-notes.svg',
+            'icon' => $this->iconPath('music'),
             'type' => 'bottom',
             'sort_order' => 1,
             'is_active' => true,
@@ -37,7 +37,7 @@ final class ScreenAndFormSeeder extends Seeder
         $vibroScreen = Screen::create([
             'name' => 'Vibro',
             'slug' => 'vibro',
-            'icon' => '/storage/icons/pulse.svg',
+            'icon' => $this->iconPath('vibro'),
             'type' => 'bottom',
             'sort_order' => 2,
             'is_active' => true,
@@ -46,7 +46,7 @@ final class ScreenAndFormSeeder extends Seeder
         $profileScreen = Screen::create([
             'name' => 'Profile',
             'slug' => 'profile',
-            'icon' => '/storage/icons/person.svg',
+            'icon' => $this->iconPath('user'),
             'type' => 'sidedrawer',
             'sort_order' => 3,
             'is_active' => true,
@@ -183,5 +183,19 @@ final class ScreenAndFormSeeder extends Seeder
         ]);
 
         $this->command->info('Screens and forms seeded successfully!');
+    }
+
+    /**
+     * Return public icon path preferring PNG when available.
+     */
+    private function iconPath(string $name): string
+    {
+        $png = public_path("storage/icons/{$name}.png");
+
+        if (file_exists($png)) {
+            return "/storage/icons/{$name}.png";
+        }
+
+        return "/storage/icons/{$name}.svg";
     }
 }
