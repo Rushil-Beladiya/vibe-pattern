@@ -52,8 +52,13 @@ Route::name('api.')->group(function () {
 
         // Get form detail and submit
         Route::get('/forms/{form}', [AdminFormController::class, 'show']);
-        Route::post('/forms/{form}/store', [AdminFormController::class, 'store']);
-        Route::post('/forms/{form}/update', [AdminFormController::class, 'update']);
+        Route::post('/forms/{form}/submit', [AdminFormController::class, 'store']);
+        
+        // Get all submissions for a form by the authenticated admin
+        Route::get('/forms/{form}/submissions', [AdminFormController::class, 'submissions']);
+        
+        // Get a specific submission detail
+        Route::get('/submissions/{submission}', [AdminFormController::class, 'getSubmission']);
     });
 
     Route::middleware(['auth:sanctum'])->prefix('user')->group(function () {
@@ -66,5 +71,14 @@ Route::name('api.')->group(function () {
 
         // Get form detail
         Route::get('/forms/{form}', [UserFormController::class, 'show']);
+        
+        // Get all submissions for a specific form (paginated)
+        Route::get('/forms/{form}/submissions', [UserFormController::class, 'index']);
+        
+        // Get submission statistics
+        Route::get('/forms/{form}/statistics', [UserFormController::class, 'statistics']);
+        
+        // Get specific submission detail
+        Route::get('/submissions/{submission}', [UserFormController::class, 'show']);
     });
 });

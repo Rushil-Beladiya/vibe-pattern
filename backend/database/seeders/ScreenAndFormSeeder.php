@@ -28,7 +28,7 @@ final class ScreenAndFormSeeder extends Seeder
         $musicScreen = Screen::create([
             'name' => 'Music',
             'slug' => 'music',
-            'icon' => 'musical-notes',
+            'icon' => '/storage/icons/musical-notes.svg',
             'type' => 'bottom',
             'sort_order' => 1,
             'is_active' => true,
@@ -37,7 +37,7 @@ final class ScreenAndFormSeeder extends Seeder
         $vibroScreen = Screen::create([
             'name' => 'Vibro',
             'slug' => 'vibro',
-            'icon' => 'pulse',
+            'icon' => '/storage/icons/pulse.svg',
             'type' => 'bottom',
             'sort_order' => 2,
             'is_active' => true,
@@ -46,7 +46,7 @@ final class ScreenAndFormSeeder extends Seeder
         $profileScreen = Screen::create([
             'name' => 'Profile',
             'slug' => 'profile',
-            'icon' => 'person',
+            'icon' => '/storage/icons/person.svg',
             'type' => 'sidedrawer',
             'sort_order' => 3,
             'is_active' => true,

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Form;
+use App\Models\FormSubmission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Str;
@@ -27,6 +28,7 @@ final class FormController
     /**
      * Submit form data (fill in field values)
      * Handles both JSON and multipart FormData requests
+     * Creates a new submission record each time
      */
     public function store(Request $request, Form $form)
     {
@@ -45,7 +47,7 @@ final class FormController
             ], 400);
         }
 
-        $updatedFields = [];
+        $submittedData = [];
         $uploadedFiles = [];
         
         foreach ($fields as $field) {
@@ -99,7 +101,7 @@ final class FormController
                     }
 
                     // Store file in public storage
-                    $path = $file->store( $form->screen->slug, 'public');
+                    $path = $file->store($form->screen->slug, 'public');
                     $url = Storage::url($path);
                     $field['value'] = url($url);
                     $uploadedFiles[$key] = url($url);
@@ -123,21 +125,68 @@ final class FormController
                 ], 422);
             }
 
-            $updatedFields[] = $field;
+            $submittedData[] = $field;
         }
 
-        // Update form with new field values
-        $form->fields = $updatedFields;
-        $form->save();
+        // Create a new form submission record
+        $submission = FormSubmission::create([
+            'form_id' => $form->id,
+            'submitted_by' => $request->user()->id,
+            'submitted_data' => $submittedData,
+            'submission_number' => FormSubmission::generateSubmissionNumber(),
+        ]);
+
+        // Load relationships
+        $submission->load(['form.screen', 'submittedBy']);
 
         return response()->json([
             'success' => true,
             'message' => 'Form submitted successfully',
             'data' => [
-                'form' => $form,
+                'submission' => $submission,
+                'submission_number' => $submission->submission_number,
                 'uploaded_files' => $uploadedFiles,
+                'total_submissions' => FormSubmission::where('form_id', $form->id)
+                    ->where('submitted_by', $request->user()->id)
+                    ->count(),
             ],
-        ], 200);
+        ], 201);
+    }
+
+    /**
+     * Get all submissions for a specific form by the authenticated admin
+     */
+    public function submissions(Request $request, Form $form)
+    {
+        $perPage = $request->input('per_page', 15);
+        
+        $submissions = FormSubmission::where('form_id', $form->id)
+            ->where('submitted_by', $request->user()->id)
+            ->with(['form.screen', 'submittedBy'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'data' => $submissions,
+            'meta' => [
+                'total_submissions' => $submissions->total(),
+                'submissions_count' => $submissions->count(),
+            ],
+        ]);
+    }
+
+    /**
+     * Get a specific submission detail
+     */
+    public function getSubmission(FormSubmission $submission)
+    {
+        $submission->load(['form.screen', 'submittedBy']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $submission,
+        ]);
     }
 
     /**

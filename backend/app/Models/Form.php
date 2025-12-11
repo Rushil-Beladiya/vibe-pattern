@@ -51,6 +51,14 @@ final class Form extends Model
     }
 
     /**
+     * Get all submissions for this form.
+     */
+    public function submissions()
+    {
+        return $this->hasMany(FormSubmission::class);
+    }
+
+    /**
      * Scope a query to only include active forms.
      */
     public function scopeActive($query)

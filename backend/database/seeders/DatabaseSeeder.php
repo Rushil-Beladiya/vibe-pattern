@@ -42,6 +42,7 @@ final class DatabaseSeeder extends Seeder
 
         $this->call([
             ScreenAndFormSeeder::class,
+            FormSubmissionSeeder::class,
         ]);
     }
 }
