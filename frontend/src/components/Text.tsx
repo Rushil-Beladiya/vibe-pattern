@@ -3,7 +3,6 @@ import {
   PixelRatio,
   Text as RNText,
   TextProps as RNTextProps,
-  StyleSheet,
   TextStyle,
 } from "react-native";
 
@@ -48,5 +47,3 @@ export const Text: FC<TextProps> = ({
     </RNText>
   );
 };
-
-const styles = StyleSheet.create({});

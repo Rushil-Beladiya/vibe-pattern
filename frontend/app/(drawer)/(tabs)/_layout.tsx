@@ -1,33 +1,18 @@
 import { Tabs } from "expo-router";
-import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
 import CustomHeader from "@/src/components/CustomHeader";
 import { useDrawer } from "@/src/components/DrawerContext";
 import { TabBar } from "@/src/components/TabBar";
-import { fetchScreens, ScreenItem } from "@/src/services/screens";
 import { colors } from "../../../src/theme/colors";
 import { spacing } from "../../../src/theme/spacing";
 
 export default function TabsLayout() {
   const { toggleDrawer } = useDrawer();
 
-  const [screens, setScreens] = useState<ScreenItem[] | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      const data = await fetchScreens({ type: "bottom" });
-      if (mounted && data && data.length) setScreens(data);
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
   return (
     <Tabs
-      tabBar={(props) => <TabBar {...props} screens={screens || undefined} />}
+      tabBar={(props) => <TabBar {...props} />}
       screenOptions={{
         headerStyle: { backgroundColor: colors.surface },
         headerTintColor: colors.text,
@@ -38,17 +23,27 @@ export default function TabsLayout() {
         ),
       }}
     >
-      {(screens || []).map((s) => (
-        <Tabs.Screen
-          key={s.route}
-          name={s.route}
-          options={{
-            title: s.title,
-            header: () => <CustomHeader title={s.title} />,
-          }}
-          initialParams={{ screen_id: s.id }}
-        />
-      ))}
+      <Tabs.Screen
+        name="music"
+        options={{
+          title: "Music",
+          header: () => <CustomHeader title="Music" />,
+        }}
+      />
+      <Tabs.Screen
+        name="vibro"
+        options={{
+          title: "vibro",
+          header: () => <CustomHeader title="Vibro" />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          header: () => <CustomHeader title="Profile" />,
+        }}
+      />
     </Tabs>
   );
 }

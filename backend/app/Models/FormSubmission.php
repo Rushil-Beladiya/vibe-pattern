@@ -33,6 +33,25 @@ final class FormSubmission extends Model
     ];
 
     /**
+     * Get submitted_data as array, handling string cases.
+     * This method ensures submitted_data is always an array, never a string.
+     */
+    public function getSubmittedDataAsArray(): array
+    {
+        $data = $this->submitted_data;
+
+        if (is_string($data)) {
+            return json_decode($data, true) ?? [];
+        }
+
+        if (!is_array($data)) {
+            return [];
+        }
+
+        return $data;
+    }
+
+    /**
      * Get the form that this submission belongs to.
      */
     public function form()

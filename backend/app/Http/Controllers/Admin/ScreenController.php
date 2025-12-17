@@ -33,4 +33,17 @@ final class ScreenController
             'data' => $forms,
         ], 200);
     }
+
+    /**
+     * Display the specified screen
+     */
+    public function show(Screen $screen)
+    {
+        $screen->load('forms');
+
+        return response()->json([
+            'success' => true,
+            'data' => $screen,
+        ], 200);
+    }
 }

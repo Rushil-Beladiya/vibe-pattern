@@ -1,7 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { FC, useEffect, useState } from "react";
 import { Animated, Pressable, StyleSheet, View, ViewStyle } from "react-native";
-import { useTheme } from "../context/ThemeContext";
 import { Text } from "./Text";
 
 export type ToastTypes = "success" | "error" | "info" | "warning";
@@ -79,7 +78,6 @@ export const Toast: FC<ToastProps> = ({
 }) => {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(-slideDistance));
-  const { isDark } = useTheme();
 
   const currentConfig = config[type];
 

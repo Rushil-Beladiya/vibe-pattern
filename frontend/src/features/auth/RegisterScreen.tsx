@@ -1,10 +1,8 @@
 import CustomHeader from "@/src/components/CustomHeader";
 import React, { FC } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
-interface RegisterScreenProps {}
-
-export const RegisterScreen: FC<RegisterScreenProps> = ({}) => {
+export const RegisterScreen: FC = () => {
   return (
     <View>
       <CustomHeader title="Register" hideLeftButton />
@@ -12,5 +10,3 @@ export const RegisterScreen: FC<RegisterScreenProps> = ({}) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({});

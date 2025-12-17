@@ -47,6 +47,9 @@ Route::name('api.')->group(function () {
 
         Route::get('/screens', [AdminScreenController::class, 'index']);
 
+        // Get a single screen detail
+        Route::get('/screens/{screen}', [AdminScreenController::class, 'show']);
+
         // Get forms for a screen
         Route::get('/screens/{screen}/forms', [AdminScreenController::class, 'forms']);
 

@@ -5,9 +5,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useToast } from "../../context/ToastContext";
 import { colors } from "../../theme/colors";
 
-interface AppVersionScreenProps {}
-
-export const AppVersionScreen: FC<AppVersionScreenProps> = ({}) => {
+export const AppVersionScreen: FC = () => {
   const { showToast } = useToast();
 
   const version =

@@ -35,6 +35,25 @@ final class Form extends Model
     ];
 
     /**
+     * Get fields as array, handling string cases.
+     * This method ensures fields is always an array, never a string.
+     */
+    public function getFieldsAsArray(): array
+    {
+        $fields = $this->fields;
+
+        if (is_string($fields)) {
+            return json_decode($fields, true) ?? [];
+        }
+
+        if (!is_array($fields)) {
+            return [];
+        }
+
+        return $fields;
+    }
+
+    /**
      * Get the screen that owns the form.
      */
     public function screen()
@@ -72,11 +91,21 @@ final class Form extends Model
     public function initializeFieldValues()
     {
         $fields = $this->fields;
+
+        if (is_string($fields)) {
+            $fields = json_decode($fields, true) ?? [];
+        }
+
+        if (! is_array($fields)) {
+            $fields = [];
+        }
+
         foreach ($fields as &$field) {
             if (! isset($field['value'])) {
                 $field['value'] = '';
             }
         }
+
         $this->fields = $fields;
 
         return $this;
@@ -89,15 +118,20 @@ final class Form extends Model
     {
         $fields = $this->fields;
 
+        if (is_string($fields)) {
+            $fields = json_decode($fields, true) ?? [];
+        }
+
+        if (! is_array($fields)) {
+            $fields = [];
+        }
+
         foreach ($fields as &$field) {
             $key = $field['key'];
 
-            // Handle file/image uploads
             if (in_array($field['type'], ['file', 'image']) && isset($files[$key])) {
                 $field['value'] = $files[$key];
-            }
-            // Handle regular inputs
-            elseif (isset($data[$key])) {
+            } elseif (isset($data[$key])) {
                 $field['value'] = $data[$key];
             }
         }

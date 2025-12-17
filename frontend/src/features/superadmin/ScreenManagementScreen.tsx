@@ -17,7 +17,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-interface ScreenManagementScreenProps {}
 type Screen = {
   id: number;
   name: string;
@@ -38,7 +37,7 @@ type FormData = {
   sort_order: number;
 };
 
-export const ScreenManagementScreen: FC<ScreenManagementScreenProps> = ({}) => {
+export const ScreenManagementScreen: FC = () => {
   const [screens, setScreens] = useState<Screen[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -56,6 +55,7 @@ export const ScreenManagementScreen: FC<ScreenManagementScreenProps> = ({}) => {
 
   useEffect(() => {
     fetchScreens();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch all screens
@@ -423,8 +423,8 @@ export const ScreenManagementScreen: FC<ScreenManagementScreenProps> = ({}) => {
           <View style={styles.deleteModalContent}>
             <Text style={styles.deleteModalTitle}>Delete Screen</Text>
             <Text style={styles.deleteModalMessage}>
-              Are you sure you want to delete "{screenToDelete?.name}"? This
-              action cannot be undone.
+              Are you sure you want to delete &quot;{screenToDelete?.name}
+              &quot;? This action cannot be undone.
             </Text>
 
             <View style={styles.deleteModalActions}>

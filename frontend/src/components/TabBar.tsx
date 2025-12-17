@@ -1,28 +1,20 @@
 import React from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { imageUrl } from "../lib/api";
-import { ScreenItem } from "../services/screens";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { colors, spacing } from "../theme";
+import { tabItems } from "../constants/menu";
 
 type TabBarProps = {
   state: any;
   descriptors: any;
   navigation: any;
-  screens?: ScreenItem[];
 };
 
-export const TabBar = ({
-  state,
-  descriptors,
-  navigation,
-  screens,
-}: TabBarProps) => {
+export const TabBar = ({ state, descriptors, navigation }: TabBarProps) => {
   return (
     <View style={styles.container}>
       {state.routes.map((route: any, idx: number) => {
-        const { options } = descriptors[route.key];
         const isFocused = state.index === idx;
-        const tab = screens?.find((t) => t.route === route.name);
+        const tab = tabItems.find((t) => t.name === route.name);
 
         const onPress = () => {
           const event = navigation.emit({
@@ -39,29 +31,24 @@ export const TabBar = ({
           <TouchableOpacity
             key={route.key}
             onPress={onPress}
-            style={styles.tab}
+            style={[styles.tab, isFocused && styles.tabActive]}
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
+            activeOpacity={0.85}
           >
-            {typeof tab?.icon === "string" ? (
-              <Image
-                source={{
-                  uri:
-                    tab.icon.startsWith("http") || tab.icon.startsWith("https")
-                      ? tab.icon
-                      : imageUrl() + tab.icon.replace(/^\/(storage\/)?/, ""),
-                }}
-                style={[styles.iconImage, isFocused && styles.iconActive]}
-                resizeMode="contain"
-              />
-            ) : (
+            <View style={[styles.iconWrap, isFocused && styles.iconWrapActive]}>
               <Text style={[styles.icon, isFocused && styles.iconActive]}>
-                {" "}
                 {tab?.icon}
               </Text>
-            )}
-            <Text style={[styles.label, isFocused && styles.labelActive]}>
-              {tab?.title || options.title || route.name}
+            </View>
+
+            <Text
+              style={[
+                styles.label,
+                isFocused ? styles.labelActive : styles.labelInactive,
+              ]}
+            >
+              {tab?.label || route.name}
             </Text>
           </TouchableOpacity>
         );
@@ -84,24 +71,36 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: spacing.sm,
   },
-  icon: {
-    fontSize: 24,
+  tabActive: {
+    backgroundColor: colors.surfaceLight,
+  },
+  iconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 4,
   },
-  iconImage: {
-    width: 24,
-    height: 24,
-    marginBottom: 4,
+  iconWrapActive: {
+    backgroundColor: colors.primaryLight,
+  },
+  icon: {
+    fontSize: 20,
   },
   iconActive: {
-    transform: [{ scale: 1.1 }],
+    color: colors.primary,
+    transform: [{ scale: 1.08 }],
   },
   label: {
     fontSize: 12,
+    marginTop: 2,
+  },
+  labelInactive: {
     color: colors.textSecondary,
   },
   labelActive: {
-    color: colors.white,
+    color: colors.primary,
     fontWeight: "600",
   },
 });

@@ -1,14 +1,10 @@
 import React, { FC } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
-interface UserMusicScreenProps {}
-
-export const UserMusicScreen: FC<UserMusicScreenProps> = ({}) => {
+export const UserMusicScreen: FC = () => {
   return (
     <View>
       <Text>UserMusicScreen</Text>
     </View>
   );
 };
-
-const styles = StyleSheet.create({});

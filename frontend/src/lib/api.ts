@@ -113,7 +113,6 @@ export const sendRequest = async ({
     };
   } catch (error: any) {
     const errorData = error?.response?.data || {};
-    const status = error?.response?.status;
 
     handleError(errorData);
     return {

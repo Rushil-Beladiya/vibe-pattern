@@ -62,7 +62,7 @@ final class FormSubmissionSeeder extends Seeder
      */
     private function generateFakeFormData(Form $form): array
     {
-        $fields = $form->fields;
+        $fields = $form->getFieldsAsArray();
         $fakeData = [];
 
         foreach ($fields as $field) {

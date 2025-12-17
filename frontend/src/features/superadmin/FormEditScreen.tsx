@@ -2,7 +2,7 @@ import { Button } from "@/src/components/Button";
 import CustomHeader from "@/src/components/CustomHeader";
 import { useToast } from "@/src/context";
 import { sendRequest } from "@/src/lib/api";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { FC, useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -16,7 +16,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-interface FormEditScreenProps {}
 type Field = {
   key: string;
   label: string;
@@ -36,10 +35,9 @@ type Form = {
   updated_at?: string;
 };
 
-export const FormEditScreen: FC<FormEditScreenProps> = ({}) => {
+export const FormEditScreen: FC = () => {
   const params = useLocalSearchParams();
   const formParam = params?.form as string | undefined;
-  const router = useRouter();
   const { showToast } = useToast();
 
   const form: Form | null = useMemo(() => {
@@ -54,10 +52,10 @@ export const FormEditScreen: FC<FormEditScreenProps> = ({}) => {
       }
       try {
         return JSON.parse(decodeURIComponent(raw));
-      } catch (err) {
+      } catch {
         return null;
       }
-    } catch (e) {
+    } catch {
       return null;
     }
   }, [formParam]);

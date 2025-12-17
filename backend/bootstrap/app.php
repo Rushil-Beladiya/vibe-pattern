@@ -20,5 +20,15 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Handle foreach() errors with proper error message
+        $exceptions->render(function (\TypeError $e) {
+            if (str_contains($e->getMessage(), 'foreach()')) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Data format error',
+                    'message' => 'Invalid data format. The submitted data must be an array or object.',
+                    'debug' => config('app.debug') ? $e->getMessage() : null,
+                ], 400);
+            }
+        });
     })->create();

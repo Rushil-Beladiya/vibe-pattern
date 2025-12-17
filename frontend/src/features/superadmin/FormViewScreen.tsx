@@ -1,7 +1,6 @@
 import CustomHeader from "@/src/components/CustomHeader";
-import { useToast } from "@/src/context";
 import { sendRequest } from "@/src/lib/api";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import React, { FC, useLayoutEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -15,7 +14,6 @@ import {
   View,
 } from "react-native";
 
-interface FormViewScreenProps {}
 type Field = {
   key: string;
   label: string;
@@ -35,16 +33,13 @@ type Form = {
   updated_at?: string;
 };
 
-export const FormViewScreen: FC<FormViewScreenProps> = ({}) => {
+export const FormViewScreen: FC = () => {
   const params = useLocalSearchParams();
   const formParam = params?.form as string | undefined;
   const screenParam = params?.screen_id as string | undefined;
-  const router = useRouter();
   const [form, setForm] = useState<Form | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [submitting, setSubmitting] = useState<boolean>(false);
   const [fieldValues, setFieldValues] = useState<{ [key: string]: any }>({});
-  const { showToast } = useToast();
 
   // Lazy parse form param if provided; otherwise fetch by screen id
   useLayoutEffect(() => {
@@ -63,7 +58,7 @@ export const FormViewScreen: FC<FormViewScreenProps> = ({}) => {
             } else {
               try {
                 parsed = JSON.parse(decodeURIComponent(parsed));
-              } catch (err) {
+              } catch {
                 // ignore
               }
             }
@@ -73,7 +68,7 @@ export const FormViewScreen: FC<FormViewScreenProps> = ({}) => {
             initializeFieldValues(parsed.fields);
           }
           return;
-        } catch (e) {
+        } catch {
           // fall through to fetching by screen id
         }
       }

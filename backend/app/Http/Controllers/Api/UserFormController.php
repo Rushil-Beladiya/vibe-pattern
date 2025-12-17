@@ -33,7 +33,8 @@ final class UserFormController
             // Get all unique field keys
             $fieldKeys = [];
             foreach ($allSubmissions as $sub) {
-                foreach ($sub->submitted_data as $field) {
+                $submittedData = $sub->getSubmittedDataAsArray();
+                foreach ($submittedData as $field) {
                     if (isset($field['key'])) {
                         $fieldKeys[$field['key']] = $field['label'] ?? $field['key'];
                     }
@@ -44,7 +45,8 @@ final class UserFormController
             foreach ($fieldKeys as $key => $label) {
                 $count = 0;
                 foreach ($allSubmissions as $sub) {
-                    foreach ($sub->submitted_data as $field) {
+                    $submittedData = $sub->getSubmittedDataAsArray();
+                    foreach ($submittedData as $field) {
                         if (isset($field['key']) && $field['key'] === $key && !empty($field['value'])) {
                             $count++;
                             break;
@@ -124,7 +126,8 @@ final class UserFormController
             $fieldData = [];
             
             foreach ($allSubmissions as $submission) {
-                foreach ($submission->submitted_data as $field) {
+                $submittedData = $submission->getSubmittedDataAsArray();
+                foreach ($submittedData as $field) {
                     $key = $field['key'] ?? null;
                     if (!$key) continue;
                     

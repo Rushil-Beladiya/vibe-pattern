@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-interface SuperAdminDashboardScreenProps {}
 type Screen = {
   id: number;
   name: string;
@@ -37,12 +36,10 @@ type Form = {
   submissions_count: number;
   is_active: boolean;
 };
-export const SuperAdminDashboardScreen: FC<
-  SuperAdminDashboardScreenProps
-> = ({}) => {
+export const SuperAdminDashboardScreen: FC = () => {
   const [forms, setForms] = useState<Form[]>([]);
-  const [loading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading] = useState(false);
 
   useLayoutEffect(() => {
     fetchAllForms();
@@ -62,7 +59,7 @@ export const SuperAdminDashboardScreen: FC<
         pathname: "/(superadmin)/formedit",
         params: { form: JSON.stringify(form) },
       });
-    } catch (e) {
+    } catch {
       router.push(
         `/(superadmin)/formedit?form=${encodeURIComponent(
           JSON.stringify(form)
@@ -82,8 +79,8 @@ export const SuperAdminDashboardScreen: FC<
         setForms(response.data as Form[]);
         console.log("Fetched forms:", response.data);
       }
-    } catch (error) {
-      console.error("Error fetching forms:", error);
+    } catch {
+      console.error("Error fetching forms:");
     }
   };
 
@@ -100,7 +97,7 @@ export const SuperAdminDashboardScreen: FC<
         pathname: "/(superadmin)/formview",
         params: { form: JSON.stringify(form) },
       });
-    } catch (e) {
+    } catch {
       // fallback to simple push
       router.push(
         `/(superadmin)/formview?form=${encodeURIComponent(

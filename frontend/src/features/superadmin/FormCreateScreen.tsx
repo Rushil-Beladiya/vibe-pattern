@@ -15,8 +15,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useToast } from "../../context/ToastContext";
 import { sendRequest } from "../../lib/api";
 
-interface FormCreateScreenProps {}
-
 type Screen = {
   id: number;
   name: string;

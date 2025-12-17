@@ -17,9 +17,7 @@ import {
   View,
 } from "react-native";
 
-interface LoginScreenProps {}
-
-export const LoginScreen: FC<LoginScreenProps> = () => {
+export const LoginScreen: FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -161,7 +159,7 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
           />
 
           <View style={styles.row}>
-            <Text style={styles.small}>Don't have an account?</Text>
+            <Text style={styles.small}>Don&apos;t have an account?</Text>
 
             <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
               <Text style={styles.link}> Register</Text>
