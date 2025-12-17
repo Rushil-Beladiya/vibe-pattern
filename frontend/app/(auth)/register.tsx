@@ -1,4 +1,4 @@
-import { RegisterScreen } from "@/src/features/auth/screens/RegisterScreen";
+import { RegisterScreen } from "@/src/features/auth/RegisterScreen";
 import { Stack } from "expo-router";
 import React from "react";
 

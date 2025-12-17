@@ -1,5 +1,5 @@
 import { usePathname, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -12,7 +12,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useUser } from "../context";
 import { colors, spacing, typography } from "../theme";
 import { useDrawer } from "./DrawerContext";
-import { fetchScreens, type ScreenItem } from "../services/screens";
 
 const DRAWER_WIDTH = 320;
 
@@ -21,18 +20,8 @@ export const CustomDrawer = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { logout } = useUser();
-  const [menuItems, setMenuItems] = useState<ScreenItem[]>([]);
+  const [menuItems, setMenuItems] = useState<[]>([]);
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      const data = await fetchScreens({ type: "sidedrawer" });
-      if (mounted) setMenuItems(data);
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
   const handleNav = (route: string, screenId?: number) => {
     closeDrawer();
     const path = screenId ? `${route}?screen_id=${screenId}` : route;
@@ -61,28 +50,7 @@ export const CustomDrawer = () => {
             <Text style={styles.userEmail}>john@example.com</Text>
           </View>
 
-          <View style={styles.menuContainer}>
-            {menuItems.map((item, idx) => {
-              const isActive = pathname.includes(item.route);
-              return (
-                <TouchableOpacity
-                  key={idx}
-                  style={[styles.menuItem, isActive && styles.menuItemActive]}
-                  onPress={() => handleNav(`/(drawer)/${item.route}`, item.id)}
-                >
-                  <Text style={styles.menuIcon}>{item.icon || "📄"}</Text>
-                  <Text
-                    style={[
-                      styles.menuLabel,
-                      isActive && styles.menuLabelActive,
-                    ]}
-                  >
-                    {item.title}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+          <View style={styles.menuContainer}></View>
 
           <View style={styles.footer}>
             <TouchableOpacity style={styles.logoutBtn} onPress={handellogout}>
@@ -154,35 +122,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: spacing.md,
     paddingHorizontal: spacing.sm,
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    marginHorizontal: spacing.sm,
-    borderRadius: 12,
-    marginBottom: 4,
-  },
-  menuItemActive: {
-    backgroundColor: colors.primary + "20",
-    borderLeftWidth: 4,
-    borderLeftColor: colors.primary,
-  },
-  menuIcon: {
-    fontSize: 20,
-    marginRight: spacing.md,
-    width: 24,
-    textAlign: "center",
-  },
-  menuLabel: {
-    ...typography.body,
-    color: colors.text,
-    fontSize: 16,
-  },
-  menuLabelActive: {
-    color: colors.primary,
-    fontWeight: "600",
   },
   footer: {
     padding: spacing.lg,

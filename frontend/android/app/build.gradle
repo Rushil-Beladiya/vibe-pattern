@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.rushilbeladiya.vibe_pattern'
+    namespace 'com.rushilbeladiya.vibepatternfrontend'
     defaultConfig {
-        applicationId 'com.rushilbeladiya.vibe_pattern'
+        applicationId 'com.rushilbeladiya.vibepatternfrontend'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

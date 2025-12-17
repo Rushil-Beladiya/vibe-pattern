@@ -1,6 +1,6 @@
+import { FormViewScreen } from "@/src/features/superadmin";
 import { Stack } from "expo-router";
 import React from "react";
-import { FormViewScreen } from "@/src/features/superadmin/screens/FormViewScreen";
 
 export default function FormViewRoute() {
   return (

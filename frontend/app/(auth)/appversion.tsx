@@ -1,4 +1,4 @@
-import { AppVersionScreen } from "@/src/features/auth/screens/AppVersion";
+import { AppVersionScreen } from "@/src/features/auth/AppVersionScreen";
 import { Stack } from "expo-router";
 import React from "react";
 

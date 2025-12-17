@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "vibe_pattern",
-    "slug": "vibe_pattern",
+    "name": "vibe-pattern-frontend",
+    "slug": "vibe-pattern-frontend",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/images.jpeg",
-    "scheme": "vibepattern",
+    "icon": "./assets/images/icon.png",
+    "scheme": "vibepatternfrontend",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -14,24 +14,24 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/images.jpeg",
-        "backgroundImage": "./assets/images/images.jpeg",
-        "monochromeImage": "./assets/images/images.jpeg"
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.rushilbeladiya.vibe_pattern"
+      "package": "com.rushilbeladiya.vibepatternfrontend"
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/images.jpeg"
+      "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/images.jpeg",
+          "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",

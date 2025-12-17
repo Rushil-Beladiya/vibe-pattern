@@ -3,81 +3,55 @@ import { sendRequest } from "@/src/lib/api";
 import { getStoreValue } from "@/src/utils/storage";
 import { useRouter } from "expo-router";
 import { useLayoutEffect } from "react";
-import { Platform, View } from "react-native";
-
-// Function to compare semantic versions
-const compareVersions = (
-  currentVersion: string,
-  minVersion: string
-): boolean => {
-  const current = currentVersion.split(".").map(Number);
-  const minimum = minVersion.split(".").map(Number);
-
-  for (let i = 0; i < Math.max(current.length, minimum.length); i++) {
-    const currentPart = current[i] || 0;
-    const minPart = minimum[i] || 0;
-
-    if (currentPart > minPart) {
-      return true;
-    }
-    if (currentPart < minPart) {
-      return false;
-    }
-  }
-  return true;
-};
+import { Platform, StyleSheet } from "react-native";
 
 export default function Index() {
+  const app_min_android_version = "1.0.1";
+  const app_min_ios_version = "1.0.1";
+  const { setUser } = useUser();
   const router = useRouter();
-  const { user, isLoading } = useUser();
+
+  useLayoutEffect(() => {
+    handleCheckAppVersion();
+  }, []);
 
   const handleCheckAppVersion = async () => {
     const response = await sendRequest({
-      action: "version_check",
+      url: `app-version`,
       method: "get",
     });
-    console.log("response -> ", response);
-
-    if (!response.success && !response.data) {
+    console.log("response App version Cheacking-> ", response);
+    if (!response.success || !response.data) {
       router.replace("/(auth)/appversion");
       return;
     }
 
-    const currentAppVersion = "1.0.0";
-    console.log("currentAppVersion -> ", currentAppVersion);
+    const apiIosVersion = response.data.min_ios_version;
+    const apiAndroidVersion = response.data.min_android_version;
 
-    const isAndroid = Platform.OS === "android";
-    const minRequiredVersion = isAndroid
-      ? response.data.min_android_version
-      : response.data.min_ios_version;
-
-    console.log("minRequiredVersion -> ", minRequiredVersion);
-    console.log("Platform -> ", Platform.OS);
-
-    const isVersionCompatible = compareVersions(
-      currentAppVersion,
-      minRequiredVersion
-    );
-    console.log("isVersionCompatible -> ", isVersionCompatible);
-
-    if (!isVersionCompatible) {
-      console.log("Version mismatch - redirecting to appversion screen");
+    if (Platform.OS === "ios") {
+      if (!apiIosVersion || apiIosVersion !== app_min_ios_version) {
+        router.replace("/(auth)/appversion");
+        return;
+      }
+    } else if (Platform.OS === "android") {
+      if (!apiAndroidVersion || apiAndroidVersion !== app_min_android_version) {
+        router.replace("/(auth)/appversion");
+        return;
+      }
+    } else {
       router.replace("/(auth)/appversion");
       return;
     }
 
     const token = await getStoreValue({ key: "token", type: "string" });
-    console.log("token -> ", token);
+    const user = await getStoreValue({ key: "user", type: "any" });
 
     if (!token || !user) {
-      router.replace("/(auth)/login");
+      router.replace("/(auth)/register");
       return;
     }
 
-    // Check role_id directly from user object
-    console.log("User role_id -> ", user.role_id);
-
-    // Convert to number if string
     const roleId =
       typeof user.role_id === "string"
         ? parseInt(user.role_id, 10)
@@ -93,13 +67,6 @@ export default function Index() {
       router.replace("/(auth)/login");
     }
   };
-
-  useLayoutEffect(() => {
-    // Wait for user context to load
-    if (!isLoading) {
-      handleCheckAppVersion();
-    }
-  }, [isLoading, user]);
-
-  return <View />;
 }
+
+const styles = StyleSheet.create({});

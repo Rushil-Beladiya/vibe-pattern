@@ -6,16 +6,14 @@ import {
   StyleSheet,
   TextStyle,
 } from "react-native";
-import { useTheme } from "../context";
-import { fontSize, fontWeight, themedColors } from "../theme";
 
 export interface TextProps {
   text?: string;
   children?: ReactNode;
   style?: TextStyle;
-  size?: keyof typeof fontSize;
-  weight?: keyof typeof fontWeight;
-  color?: keyof typeof themedColors.light;
+  size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl";
+  weight?: "light" | "regular" | "medium" | "bold";
+  color?: "text" | "muted" | "primary" | "secondary" | "error";
   textProps?: RNTextProps;
   maxScale?: number;
 }
@@ -27,20 +25,19 @@ export const Text: FC<TextProps> = ({
   size = "xs",
   weight = "regular",
   color = "text",
-  textProps,
   maxScale = 1.6,
+  textProps,
 }) => {
   const content = text || children;
-  const { theme } = useTheme();
 
-  const baseFontSize = fontSize[size]?.fontSize ?? 18;
+  const baseFontSize = 18;
   const systemScale = PixelRatio.getFontScale();
   const effectiveScale = Math.min(systemScale, maxScale);
 
   const modifiedStyle: TextStyle = {
     color: "",
     fontSize: baseFontSize * effectiveScale,
-    fontWeight: fontWeight[weight]?.fontWeight,
+    fontWeight: "400",
     flexShrink: 1,
     ...style,
   };

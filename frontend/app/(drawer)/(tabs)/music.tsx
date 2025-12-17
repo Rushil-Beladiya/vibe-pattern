@@ -1,5 +1,5 @@
 import { useUser } from "@/src/context";
-import { MusicScreen } from "@/src/features/tab/screens/music/MusicScreen";
+import { AdminMusicScreen, UserMusicScreen } from "@/src/features/admin/Music";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 
@@ -11,7 +11,7 @@ export default function MusicTabScreen() {
   return (
     <>
       <Stack.Screen options={{ gestureEnabled: false }} />
-      {userRole.admin ? <MusicScreen screen_id={screen_id} /> : null}
+      {userRole.admin ? <AdminMusicScreen /> : <UserMusicScreen />}
     </>
   );
 }

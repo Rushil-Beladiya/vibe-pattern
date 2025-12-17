@@ -1,6 +1,6 @@
+import { FormCreateScreen } from "@/src/features/superadmin";
 import { Stack } from "expo-router";
 import React from "react";
-import { FormCreateScreen } from "@/src/features/superadmin/screens/FormCreateScreen";
 
 export default function FormCreateRoute() {
   return (

@@ -1,6 +1,6 @@
+import { ScreenManagementScreen } from "@/src/features/superadmin";
 import { Stack } from "expo-router";
 import React from "react";
-import ScreenManagementScreen from "@/src/features/superadmin/screens/ScreenManagementScreen";
 
 export default function ScreensRoute() {
   return (

@@ -6,10 +6,9 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { Text, TextProps } from "./Text";
-import { themedColors, colors } from "../theme";
-import { useTheme } from "../context";
+import { colors } from "../theme";
 import { isEmpty } from "../utils/helper";
+import { Text, TextProps } from "./Text";
 
 type ButtonType =
   | "secondary"
@@ -43,7 +42,7 @@ export interface ButtonProps {
   type?: ButtonType;
   rightContent?: ReactNode;
   textStyle?: TextProps;
-  backgroundColor?: keyof typeof themedColors.light;
+  backgroundColor?: string;
   width?: number;
   visible?: boolean;
 }
@@ -66,8 +65,6 @@ export const Button: FC<ButtonProps> = ({
   width = 50,
   visible = true,
 }) => {
-  const { theme } = useTheme();
-
   const typeWiseStyle: Partial<Record<ButtonType, ButtonStyleProps>> = {
     secondary: {
       backgroundColor: colors.secondary,
@@ -82,20 +79,20 @@ export const Button: FC<ButtonProps> = ({
       loadingColor: colors.secondary,
     },
     primary: {
-      backgroundColor: theme?.primary ?? colors.primary,
-      borderColor: theme.primary ?? colors.primary,
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
       textColor: colors.white,
       loadingColor: colors.white,
     },
     danger_with_border: {
       backgroundColor: "transparent",
-      borderColor: colors.error ?? colors.red,
-      textColor: colors.error ?? colors.red,
-      loadingColor: colors.error ?? colors.red,
+      borderColor: colors.red,
+      textColor: colors.red,
+      loadingColor: colors.red,
     },
     danger: {
-      backgroundColor: colors.error ?? colors.red,
-      borderColor: colors.error ?? colors.red,
+      backgroundColor: colors.red,
+      borderColor: colors.red,
       textColor: colors.white,
       loadingColor: colors.white,
     },
@@ -127,7 +124,7 @@ export const Button: FC<ButtonProps> = ({
               borderColor: buttonDetails?.borderColor,
               width: `${width}%`,
               ...(!isEmpty(backgroundColor) && {
-                backgroundColor: theme[backgroundColor as keyof typeof theme],
+                backgroundColor: backgroundColor,
               }),
               ...style,
             }}
@@ -154,7 +151,7 @@ export const Button: FC<ButtonProps> = ({
               borderWidth: 0,
               width: `${width}%`,
               ...(!isEmpty(backgroundColor) && {
-                backgroundColor: theme[backgroundColor as keyof typeof theme],
+                backgroundColor: backgroundColor,
               }),
               ...style,
             }}
@@ -179,7 +176,7 @@ export const Button: FC<ButtonProps> = ({
               ...styles?.container,
               borderWidth: 0,
               ...(!isEmpty(backgroundColor) && {
-                backgroundColor: theme[backgroundColor as keyof typeof theme],
+                backgroundColor: backgroundColor,
               }),
               ...style,
             }}

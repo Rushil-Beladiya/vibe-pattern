@@ -1,5 +1,9 @@
 import { useUser } from "@/src/context";
-import { ProfileScreen } from "@/src/features/tab/screens/ProfileScreen";
+import {
+  AdminProfileScreen,
+  UserProfileScreen,
+} from "@/src/features/admin/Profile";
+
 import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 
@@ -11,7 +15,7 @@ export default function ProfilRoute() {
   return (
     <>
       <Stack.Screen options={{ gestureEnabled: false }} />
-      {userRole.admin ? <ProfileScreen screen_id={screen_id} /> : null}
+      {userRole.admin ? <AdminProfileScreen /> : <UserProfileScreen />}
     </>
   );
 }

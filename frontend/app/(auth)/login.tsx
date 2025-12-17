@@ -1,4 +1,4 @@
-import { LoginScreen } from "@/src/features/auth/screens/LoginScreen";
+import { LoginScreen } from "@/src/features/auth/LoginScreen";
 import { Stack } from "expo-router";
 import React from "react";
 

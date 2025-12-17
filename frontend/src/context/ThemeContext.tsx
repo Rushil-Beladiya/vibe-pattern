@@ -1,12 +1,9 @@
 import { createContext, FC, ReactNode, useContext, useState } from "react";
 import { useColorScheme } from "react-native";
-import { themedColors } from "../theme";
 import { isEmpty } from "../utils/helper";
-import { getStoreValue, setStoreValue } from "../utils/storage";
 
 interface ThemeContextProps {
   isDark: boolean;
-  theme: typeof themedColors.light;
   toggleTheme: () => void;
 }
 
@@ -27,14 +24,6 @@ export const ThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const changeThemeBaseOnDevice = () => {
     if (!isEmpty(deviceTheme)) {
       setActiveTheme(deviceTheme as ThemeType);
-      setStoreValue({ key: "theme", value: deviceTheme });
-    }
-  };
-
-  const getThemeDetails = async () => {
-    const selectedTheme = await getStoreValue({ key: "theme" });
-    if (!isEmpty(selectedTheme)) {
-      setActiveTheme(selectedTheme as ThemeType);
     }
   };
 
@@ -42,17 +31,15 @@ export const ThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
     try {
       const updatedTheme = activeTheme === "light" ? "dark" : "light";
       setActiveTheme(updatedTheme);
-      setStoreValue({ key: "theme", value: updatedTheme });
     } catch (e) {
       console.log("Failed to save theme:", e);
     }
   };
 
-  const theme = themedColors[activeTheme];
   const isDark = activeTheme === "dark";
 
   return (
-    <ThemeContext.Provider value={{ isDark, theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );

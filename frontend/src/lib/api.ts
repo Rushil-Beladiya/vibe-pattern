@@ -4,7 +4,7 @@ import { isEmpty } from "../utils/helper";
 import { clearStore, getStoreValue } from "../utils/storage";
 
 // const baseUrl = "";
-const baseUrl = "http://192.168.29.246:8000/";
+const baseUrl = "http://192.168.0.102:8000/";
 const apiUrl = baseUrl + "api/";
 
 export const imageUrl = () => `${baseUrl}storage/`;
@@ -14,8 +14,6 @@ export const apiActions = {
   login: "login",
   register: "register",
   logout: "logout",
-  // forgot_password: "auth/forgot-password",
-  // reset_password: "auth/reset-password",
   version_check: "app-version",
 };
 
@@ -95,27 +93,10 @@ export const sendRequest = async ({
       headers,
     };
 
-    console.log("🚀 API Request Started", {
-      method: method.toUpperCase(),
-      endpoint: requestConfig.url,
-      baseURL: apiUrl,
-      timestamp: new Date().toISOString(),
-    });
-
-    if (data) {
-      console.log(`📦 Request Data:`, data);
-    }
-
     const response = await apiClient.request(requestConfig);
 
-    console.log("✅ API Response Success", {
-      status: response?.status,
-      statusText: response?.statusText,
-      endpoint: requestConfig.url,
-      data: response.data,
-    });
+    console.log("Response Api-> ", response);
 
-    // Successful response
     if (response?.status === 200 || response?.status === 201) {
       return {
         success: true,
@@ -133,15 +114,6 @@ export const sendRequest = async ({
   } catch (error: any) {
     const errorData = error?.response?.data || {};
     const status = error?.response?.status;
-
-    console.error("❌ API Request Failed", {
-      status: status,
-      statusText: error?.response?.statusText,
-      endpoint: error?.config?.url,
-      error_message: errorData?.message || error?.message,
-      errors: errorData?.errors || {},
-      timestamp: new Date().toISOString(),
-    });
 
     handleError(errorData);
     return {

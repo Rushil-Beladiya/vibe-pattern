@@ -1,13 +1,13 @@
 import { Tabs } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
 import CustomHeader from "@/src/components/CustomHeader";
 import { useDrawer } from "@/src/components/DrawerContext";
 import { TabBar } from "@/src/components/TabBar";
+import { fetchScreens, ScreenItem } from "@/src/services/screens";
 import { colors } from "../../../src/theme/colors";
 import { spacing } from "../../../src/theme/spacing";
-import { fetchScreens, ScreenItem } from "@/src/services/screens";
 
 export default function TabsLayout() {
   const { toggleDrawer } = useDrawer();

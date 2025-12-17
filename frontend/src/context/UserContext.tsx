@@ -24,9 +24,6 @@ export interface User {
   email: string;
   role_id: number | string; // 1 = superadmin, 2 = admin, 3 = user (can be string or number)
   name: string;
-  created_at: string;
-  updated_at: string;
-  email_verified_at: string;
   access_token?: string;
 }
 
@@ -104,7 +101,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
         setUserState(null);
         setUserRole({ superadmin: false, admin: false, user: false });
       }
-      console.log(" -> ");
     } catch (error) {
       console.error("Error loading user:", error);
       setUserState(null);

@@ -1,7 +1,8 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { imageUrl } from "../lib/api";
+import { ScreenItem } from "../services/screens";
 import { colors, spacing } from "../theme";
-import type { ScreenItem } from "../services/screens";
 
 type TabBarProps = {
   state: any;
@@ -10,7 +11,12 @@ type TabBarProps = {
   screens?: ScreenItem[];
 };
 
-export const TabBar = ({ state, descriptors, navigation, screens }: TabBarProps) => {
+export const TabBar = ({
+  state,
+  descriptors,
+  navigation,
+  screens,
+}: TabBarProps) => {
   return (
     <View style={styles.container}>
       {state.routes.map((route: any, idx: number) => {
@@ -37,9 +43,23 @@ export const TabBar = ({ state, descriptors, navigation, screens }: TabBarProps)
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
           >
-            <Text style={[styles.icon, isFocused && styles.iconActive]}>
-              {tab?.icon}
-            </Text>
+            {typeof tab?.icon === "string" ? (
+              <Image
+                source={{
+                  uri:
+                    tab.icon.startsWith("http") || tab.icon.startsWith("https")
+                      ? tab.icon
+                      : imageUrl() + tab.icon.replace(/^\/(storage\/)?/, ""),
+                }}
+                style={[styles.iconImage, isFocused && styles.iconActive]}
+                resizeMode="contain"
+              />
+            ) : (
+              <Text style={[styles.icon, isFocused && styles.iconActive]}>
+                {" "}
+                {tab?.icon}
+              </Text>
+            )}
             <Text style={[styles.label, isFocused && styles.labelActive]}>
               {tab?.title || options.title || route.name}
             </Text>
@@ -66,6 +86,11 @@ const styles = StyleSheet.create({
   },
   icon: {
     fontSize: 24,
+    marginBottom: 4,
+  },
+  iconImage: {
+    width: 24,
+    height: 24,
     marginBottom: 4,
   },
   iconActive: {

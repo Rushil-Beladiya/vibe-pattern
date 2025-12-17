@@ -6,13 +6,12 @@ export default function AuthLayout() {
       screenOptions={{
         headerShown: false,
         animation: "slide_from_right",
-        gestureEnabled: true,
-        gestureDirection: "horizontal",
+        gestureEnabled: false,
       }}
     >
-      <Stack.Screen name="login" />
-      <Stack.Screen name="register" />
-      <Stack.Screen name="appversion" />
+      <Stack.Screen name="login" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="register" options={{ gestureEnabled: true }} />
+      <Stack.Screen name="appversion" options={{ gestureEnabled: false }} />
     </Stack>
   );
 }
