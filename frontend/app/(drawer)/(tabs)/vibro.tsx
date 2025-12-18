@@ -1,5 +1,6 @@
 import { useUser } from "@/src/context";
-import { AdminVibroScreen, UserVibroScreen } from "@/src/features/admin/Vibro";
+import { AdminVibroScreen } from "@/src/features/admin/Vibro";
+import UserVibroScreen from "@/src/features/admin/Vibro/UserVibroScreen";
 
 import { Stack } from "expo-router";
 import React from "react";

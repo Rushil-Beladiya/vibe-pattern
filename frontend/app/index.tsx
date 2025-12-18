@@ -48,7 +48,7 @@ export default function Index() {
     const user = await getStoreValue({ key: "user", type: "any" });
 
     if (!token || !user) {
-      router.replace("/(auth)/register");
+      router.replace("/(auth)/login");
       return;
     }
 

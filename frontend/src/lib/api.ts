@@ -92,6 +92,7 @@ export const sendRequest = async ({
       data,
       headers,
     };
+    console.log("Request Config Api-> ", requestConfig);
 
     const response = await apiClient.request(requestConfig);
 
