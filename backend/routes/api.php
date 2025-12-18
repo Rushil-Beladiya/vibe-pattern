@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Admin\FormController as AdminFormController;
+use App\Http\Controllers\Admin\FormSubmissionController as AdminFormSubmissionController;
 use App\Http\Controllers\Admin\ScreenController as AdminScreenController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\SuperAdmin\FormController as SuperAdminFormController;
 use App\Http\Controllers\SuperAdmin\ScreenController as SuperAdminScreenController;
 use App\Http\Controllers\User\FormController as UserFormController;
+use App\Http\Controllers\User\FormSubmissionController as UserFormSubmissionController;
 use App\Http\Controllers\User\ScreenController as UserScreenController;
 use Illuminate\Support\Facades\Route;
 
@@ -47,41 +49,59 @@ Route::name('api.')->group(function () {
 
         Route::get('/screens', [AdminScreenController::class, 'index']);
 
-        // Get a single screen detail
         Route::get('/screens/{screen}', [AdminScreenController::class, 'show']);
 
-        // Get forms for a screen
         Route::get('/screens/{screen}/forms', [AdminScreenController::class, 'forms']);
 
-        // Get form detail and submit
-        Route::get('/forms/{form}', [AdminFormController::class, 'show']);
-        Route::post('/forms/{form}/submit', [AdminFormController::class, 'store']);
-        
-        // Get all submissions for a form by the authenticated admin
+        Route::prefix('forms')->group(function () {
+            Route::get('/{form}', [AdminFormController::class, 'show']);
+            
+            Route::post('/{form}/submit', [AdminFormController::class, 'store']);
+        });
+
+        Route::prefix('submissions')->group(function () {
+            Route::get('/form/{form}', [AdminFormSubmissionController::class, 'index']);
+            
+            Route::get('/{submission}', [AdminFormSubmissionController::class, 'show']);
+            
+            Route::get('/form/{form}/user/{userId}', [AdminFormSubmissionController::class, 'getSubmissionsByUser']);
+            
+            Route::get('/form/{form}/export', [AdminFormSubmissionController::class, 'export']);
+            
+            Route::get('/form/{form}/statistics', [AdminFormSubmissionController::class, 'getStatistics']);
+        });
+
         Route::get('/forms/{form}/submissions', [AdminFormController::class, 'submissions']);
-        
-        // Get a specific submission detail
         Route::get('/submissions/{submission}', [AdminFormController::class, 'getSubmission']);
     });
 
     Route::middleware(['auth:sanctum'])->prefix('user')->group(function () {
 
-        // Get all active screens (for bottom tab bar)
         Route::get('/screens', [UserScreenController::class, 'index']);
 
-        // Get forms for a specific screen by slug
         Route::get('/screens/{slug}/forms', [UserScreenController::class, 'formsBySlug']);
 
-        // Get form detail
-        Route::get('/forms/{form}', [UserFormController::class, 'show']);
-        
-        // Get all submissions for a specific form (paginated)
-        Route::get('/forms/{form}/submissions', [UserFormController::class, 'index']);
-        
-        // Get submission statistics
-        Route::get('/forms/{form}/statistics', [UserFormController::class, 'statistics']);
-        
-        // Get specific submission detail
-        Route::get('/submissions/{submission}', [UserFormController::class, 'show']);
+        Route::prefix('forms')->group(function () {
+            Route::get('/{form}', [UserFormController::class, 'show']);
+            
+            Route::post('/{form}/submit', [UserFormSubmissionController::class, 'store']);
+            
+            Route::get('/{form}/submissions', [UserFormController::class, 'getSubmissionHistory']);
+            
+            Route::get('/by-screen/{screenSlug}', [UserFormController::class, 'getFormsByScreen']);
+        });
+
+        Route::prefix('submissions')->group(function () {
+            Route::get('/', [UserFormSubmissionController::class, 'index']);
+            
+            Route::get('/{submission}', [UserFormSubmissionController::class, 'show']);
+            
+            Route::get('/form/{form}', [UserFormSubmissionController::class, 'getFormSubmissions']);
+
+            // Get submissions by screen (user-specific)
+            Route::get('/screen/{screen}', [UserFormSubmissionController::class, 'getScreenSubmissions']);
+            
+            Route::get('/stats/overview', [UserFormSubmissionController::class, 'getStats']);
+        });
     });
 });

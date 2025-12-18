@@ -1,5 +1,11 @@
 import { sendRequest } from "@/src/lib/api";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { PatternSelector } from "./component/PatternSelector";
 import { VibrationPlayer } from "./component/VibrationPlayer";
@@ -16,144 +22,147 @@ type Pattern = {
   intensityValues?: number[];
 };
 
-// Default fallback pattern
-const DEFAULT_PATTERN: Pattern = {
-  id: 0,
-  name: "Default Pattern",
-  pattern: [100, 200, 100, 300, 150],
-  icon: "📊",
-  intensityValues: [0, 100, 200, 100, 300],
+// Helper: attempt to parse JSON strings
+const tryParseJson = (s: any) => {
+  try {
+    return typeof s === "string" ? JSON.parse(s) : s;
+  } catch (_) {
+    return null;
+  }
+};
+
+const looksLikeJson = (s: any) =>
+  typeof s === "string" &&
+  (s.trim().startsWith("{") || s.trim().startsWith("["));
+
+const getFieldValue = (arr: any[] = [], key: string) => {
+  const f = arr.find((i) => i.key === key);
+  if (!f) return null;
+  return typeof f.value === "string" && looksLikeJson(f.value)
+    ? tryParseJson(f.value)
+    : f.value;
 };
 
 export default function UserVibroScreen() {
-  const [patterns, setPatterns] = useState<Pattern[]>([DEFAULT_PATTERN]);
+  const [patterns, setPatterns] = useState<Pattern[]>([]);
   const [loading, setLoading] = useState(true);
   const [selIdx, setSelIdx] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [playing, setPlaying] = useState(false);
   const [showList, setShowList] = useState(false);
 
-  const selPat = patterns[selIdx] ?? patterns[0];
+  const selPat = useMemo(
+    () =>
+      patterns[selIdx] ??
+      patterns[0] ?? {
+        id: undefined,
+        name: "No Pattern",
+        pattern: [],
+        icon: "📊",
+        intensityValues: [],
+      },
+    [patterns, selIdx]
+  );
 
-  useEffect(() => {
-    // fetch submission (example id 8) and convert to pattern shape
+  useLayoutEffect(() => {
     fetchUserVibro();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchUserVibro = async () => {
     try {
       setLoading(true);
       const res = await sendRequest({
-        url: `user/submissions/8`,
+        url: `user/submissions?screen_id=2`,
         method: "get",
       });
       const payload = res?.data ?? res;
       const submission = payload?.data ?? payload;
 
-      console.log("Fetched submission:", submission);
+      console.log("Fetched submission(s):", submission);
 
       if (!submission) {
         setLoading(false);
         return;
       }
 
-      const sd = submission.submitted_data ?? [];
+      // Normalize to an array of submissions
+      const submissionsArray = Array.isArray(submission)
+        ? submission
+        : [submission];
 
-      // Try to find a nested vibration pattern object first
-      const vibField = sd.find((f: any) => f.key === "vibration_pattern");
+      const patternsFromSubs = submissionsArray
+        .map((s: any) => {
+          const sd = s.submitted_data ?? [];
+          const vibField = sd.find((f: any) => f.key === "vibration_pattern");
 
-      let patternObj: Pattern | null = null;
+          if (vibField) {
+            const val =
+              typeof vibField.value === "string"
+                ? tryParseJson(vibField.value)
+                : vibField.value;
+            if (val && Array.isArray(val.pattern_ms)) {
+              return {
+                id: s.id,
+                name:
+                  val.name ||
+                  getFieldValue(sd, "pattern_name") ||
+                  s.form?.name ||
+                  s.submission_number ||
+                  "Pattern",
+                pattern: val.pattern_ms,
+                icon: val.icon || "📊",
+                intensityValues: Array.isArray(val.intensity_values)
+                  ? val.intensity_values
+                  : [],
+              } as Pattern;
+            }
+          }
 
-      if (vibField) {
-        const val =
-          typeof vibField.value === "string"
-            ? tryParseJson(vibField.value)
-            : vibField.value;
-        if (val && Array.isArray(val.pattern_ms)) {
-          patternObj = {
-            id: submission.id,
+          const pms =
+            getFieldValue(sd, "pattern_ms") ||
+            getFieldValue(sd, "pattern") ||
+            null;
+          const iv =
+            getFieldValue(sd, "intensity_values") ||
+            getFieldValue(sd, "intensity") ||
+            null;
+          if (Array.isArray(pms)) {
+            return {
+              id: s.id,
+              name:
+                getFieldValue(sd, "pattern_name") ||
+                s.form?.name ||
+                s.submission_number ||
+                "Pattern",
+              pattern: pms,
+              icon: "📊",
+              intensityValues: Array.isArray(iv) ? iv : [],
+            } as Pattern;
+          }
+
+          // no pattern data found — return a minimal record (empty pattern)
+          return {
+            id: s.id,
             name:
-              val.name ||
               getFieldValue(sd, "pattern_name") ||
-              submission.form?.name ||
-              "Pattern",
-            pattern: val.pattern_ms,
-            icon: val.icon || "📊",
-            intensityValues: val.intensity_values ?? [],
-          };
-        }
-      }
-
-      // Fallback: try to build pattern from separate fields
-      if (!patternObj) {
-        const pms =
-          getFieldValue(sd, "pattern_ms") ||
-          getFieldValue(sd, "pattern") ||
-          null;
-        const iv =
-          getFieldValue(sd, "intensity_values") ||
-          getFieldValue(sd, "intensity") ||
-          null;
-        if (Array.isArray(pms)) {
-          patternObj = {
-            id: submission.id,
-            name:
-              getFieldValue(sd, "pattern_name") ||
-              submission.form?.name ||
-              "Pattern",
-            pattern: pms,
+              s.submission_number ||
+              "Custom Pattern",
+            pattern: [],
             icon: "📊",
-            intensityValues: Array.isArray(iv) ? iv : [],
-          };
-        }
-      }
+            intensityValues: [],
+          } as Pattern;
+        })
+        .filter(Boolean) as Pattern[];
 
-      // Final fallback: create pattern from submitted data
-      if (!patternObj) {
-        const patternName =
-          getFieldValue(sd, "pattern_name") || "Custom Pattern";
-        patternObj = {
-          id: submission.id,
-          name: patternName,
-          pattern: [100, 200, 100, 300, 150], // default pattern
-          icon: "📊",
-          intensityValues: [0, 100, 200, 100, 300],
-        };
-      }
-
-      if (patternObj) {
-        setPatterns([patternObj]);
+      if (patternsFromSubs.length > 0) {
+        setPatterns(patternsFromSubs);
+        setSelIdx(0);
       }
     } catch (error) {
       console.error("Error fetching vibro data:", error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const tryParseJson = (s: any) => {
-    try {
-      return typeof s === "string" ? JSON.parse(s) : s;
-    } catch (_) {
-      return null;
-    }
-  };
-
-  const getFieldValue = (arr: any[], key: string) => {
-    const f = arr.find((i) => i.key === key);
-    return f
-      ? typeof f.value === "string" && looksLikeJson(f.value)
-        ? tryParseJson(f.value)
-        : f.value
-      : null;
-  };
-
-  const looksLikeJson = (s: string) => {
-    return (
-      typeof s === "string" &&
-      (s.trim().startsWith("{") || s.trim().startsWith("["))
-    );
   };
 
   const toggle = useCallback(() => {

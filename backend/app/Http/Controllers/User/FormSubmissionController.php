@@ -2,32 +2,37 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\User;
 
 use App\Models\Form;
 use App\Models\FormSubmission;
+use App\Models\Screen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Log;
 use Str;
 
-final class FormController
+final class FormSubmissionController
 {
     /**
-     * Get form details
+     * Get all user submissions
      */
-    public function show(Form $form)
+    public function index(Request $request)
     {
-        $form->load('screen:id,name,slug');
+        Log::info('Fetching user submissions with filters', ['request' => $request->all()]);
+
+        $submissions = FormSubmission::whereHas('form', function ($query) use ($request) {
+            $query->where('screen_id', $request->get('screen_id'));
+        })->get();
 
         return response()->json([
             'success' => true,
-            'message' => 'Form retrieved successfully',
-            'data' => $form,
+            'data' => $submissions,
+            'message' => 'Submissions retrieved successfully',
         ]);
     }
-
     /**
-     * Submit form data (Admin fills form)
+     * Submit form with data
      */
     public function store(Request $request, Form $form)
     {
@@ -35,7 +40,7 @@ final class FormController
             if (!$form->is_active) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'This form is inactive',
+                    'message' => 'Form is inactive',
                 ], 403);
             }
 
@@ -61,23 +66,22 @@ final class FormController
                 $type = $field['type'];
                 $required = filter_var($field['required'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
-                // Handle file/image uploads
+                // Handle file uploads
                 if (in_array($type, ['file', 'image'])) {
                     $field['value'] = $this->handleFileUpload($request, $field, $form);
                     if ($field['value']) {
                         $uploadedFiles[$key] = $field['value'];
                     }
                 } else {
-                    // Get field value from request
                     $field['value'] = $request->input($key) ?? $request->input("fields.{$key}") ?? null;
                 }
 
-                // Validate required fields
+                // Validate required
                 if ($required && empty($field['value'])) {
                     return response()->json([
                         'success' => false,
                         'message' => "Field '{$field['label']}' is required",
-                        'errors' => [$key => ["The {$field['label']} field is required"]],
+                        'errors' => [$key => ["Required field"]],
                     ], 422);
                 }
 
@@ -107,18 +111,39 @@ final class FormController
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to submit form',
+                'message' => 'Submission failed',
                 'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }
 
     /**
-     * Legacy endpoint - get submissions
+     * Get single submission (user's own)
      */
-    public function submissions(Request $request, Form $form)
+    public function show(FormSubmission $submission, Request $request)
     {
-        $perPage = $request->input('per_page', 15);
+        // if ($submission->submitted_by !== $request->user()->id) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Unauthorized',
+        //     ], 403);
+        // }
+
+        $submission->load(['form.screen:id,name,slug', 'submittedBy:id,name,email']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $submission,
+            'message' => 'Submission retrieved successfully',
+        ]);
+    }
+
+    /**
+     * Get form-specific submissions
+     */
+    public function getFormSubmissions(Request $request, Form $form)
+    {
+        $perPage = (int) $request->input('per_page', 15);
 
         $submissions = FormSubmission::where('form_id', $form->id)
             ->where('submitted_by', $request->user()->id)
@@ -135,24 +160,67 @@ final class FormController
                 'per_page' => $submissions->perPage(),
                 'current_page' => $submissions->currentPage(),
                 'total_pages' => $submissions->lastPage(),
-                'has_more' => $submissions->hasMorePages(),
             ],
+            'form' => $form->only(['id', 'name', 'screen_id']),
             'message' => 'Submissions retrieved successfully',
         ]);
     }
 
     /**
-     * Legacy endpoint - get single submission
+     * Get submissions for all forms under a screen (user-specific)
      */
-    public function getSubmission(FormSubmission $submission)
+    public function getScreenSubmissions(Request $request, Screen $screen)
     {
-        $submission->load(['form.screen:id,name,slug', 'submittedBy:id,name,email']);
+        $perPage = (int) $request->input('per_page', 15);
+
+        $formIds = $screen->forms()->pluck('id')->toArray();
+
+        $submissions = FormSubmission::whereIn('form_id', $formIds)
+            ->where('submitted_by', $request->user()->id)
+            ->with(['form.screen:id,name,slug', 'submittedBy:id,name,email'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
 
         return response()->json([
             'success' => true,
-            'data' => $submission,
-            'message' => 'Submission retrieved successfully',
-        ], 200);
+            'data' => $submissions->items(),
+            'pagination' => [
+                'total' => $submissions->total(),
+                'count' => $submissions->count(),
+                'per_page' => $submissions->perPage(),
+                'current_page' => $submissions->currentPage(),
+                'total_pages' => $submissions->lastPage(),
+            ],
+            'screen' => $screen->only(['id', 'name', 'slug']),
+            'message' => 'Submissions retrieved successfully',
+        ]);
+    }
+
+    /**
+     * Get user statistics
+     */
+    public function getStats(Request $request)
+    {
+        $userId = $request->user()->id;
+
+        $stats = [
+            'total_submissions' => FormSubmission::where('submitted_by', $userId)->count(),
+            'total_forms_filled' => FormSubmission::where('submitted_by', $userId)
+                ->distinct('form_id')
+                ->count('form_id'),
+            'submissions_by_date' => FormSubmission::where('submitted_by', $userId)
+                ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+                ->groupBy('date')
+                ->orderBy('date', 'desc')
+                ->limit(30)
+                ->get(),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $stats,
+            'message' => 'Statistics retrieved successfully',
+        ]);
     }
 
     /**

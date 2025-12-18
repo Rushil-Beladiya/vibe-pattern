@@ -119,10 +119,14 @@ export const VibrationPlayer: React.FC<VibrationPlayerProps> = ({
 
   const startVib = useCallback(() => {
     if (!pattern) return;
-    const pat = pattern.pattern.map((d: number) =>
-      Math.max(10, Math.round(d / speed))
-    );
-    Vibration.vibrate(pat, true);
+    const raw = Array.isArray(pattern.pattern) ? pattern.pattern : [];
+    const pat = raw
+      .map((d: number) => Math.max(10, Math.round(d / speed)))
+      .filter((n: number) => typeof n === "number" && n > 0);
+
+    // Ensure we have at least one non-zero timing. Use a sensible fallback if not.
+    const safePattern = pat.length > 0 ? pat : [120, 80, 120];
+    Vibration.vibrate(safePattern, true);
     intRef.current && clearInterval(intRef.current);
     intRef.current = setInterval(() => {
       Animated.sequence([
@@ -296,8 +300,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   playIco: { fontSize: 42, color: "#a855f7" },
-  nav: { position: "absolute", top: "50%", marginTop: -22, padding: 10 },
-  navL: { left: 6 },
-  navR: { right: 6 },
-  navT: { fontSize: 34, color: "#d1d5db", fontWeight: "200" },
 });

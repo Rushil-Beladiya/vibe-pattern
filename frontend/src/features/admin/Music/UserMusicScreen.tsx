@@ -1,6 +1,13 @@
 import { sendRequest } from "@/src/lib/api";
 import { Ionicons } from "@expo/vector-icons";
-import React, { FC, useEffect, useMemo, useState } from "react";
+import React, {
+  FC,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Dimensions,
   ScrollView,
@@ -30,40 +37,43 @@ export const UserMusicScreen: FC = () => {
   const [selectedTrack, setSelectedTrack] = useState<MusicTrack | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  useEffect(() => {
-    fetchUserMusic();
-  }, []);
-
-  const fetchUserMusic = async () => {
+  const fetchUserMusic = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const response: any = await sendRequest({
-        url: `user/submissions/1`,
+        url: `user/submissions?screen_id=1`,
         method: "get",
       });
-      const data = response?.data;
-      if (!data || !data.submitted_data) {
-        setError("No submission data found");
+      const payload = response?.data ?? response;
+
+      // Normalize to an array of submissions
+      let submissions: any[] = [];
+      if (Array.isArray(payload?.data)) submissions = payload.data;
+      else if (Array.isArray(payload)) submissions = payload;
+      else if (payload?.submitted_data) submissions = [payload];
+      else submissions = [];
+
+      if (submissions.length === 0) {
         setTracks([]);
+        setError(null);
         return;
       }
 
-      const submitted = data.submitted_data as any[];
-      const mapped: MusicTrack[] = [
-        {
-          id: String(data.id || "1"),
-          name:
-            (submitted.find((f) => f.key === "music_name")?.value as string) ||
-            "Untitled",
-          backgroundColor: colorFromString(
-            submitted.find((f) => f.key === "music_name")?.value || "#6b7280"
-          ),
-          imageUrl: submitted.find((f) => f.key === "cover_image")?.value,
-          musicUrl: submitted.find((f) => f.key === "music_file")?.value,
+      const mapped: MusicTrack[] = submissions.map((item: any) => {
+        const submitted = item.submitted_data ?? [];
+        const name =
+          (submitted.find((f: any) => f.key === "music_name")
+            ?.value as string) || "Untitled";
+        return {
+          id: String(item.id ?? item.submission_number ?? Math.random()),
+          name,
+          backgroundColor: colorFromString(name || "#6b7280"),
+          imageUrl: submitted.find((f: any) => f.key === "cover_image")?.value,
+          musicUrl: submitted.find((f: any) => f.key === "music_file")?.value,
           locked: false,
-        },
-      ];
+        } as MusicTrack;
+      });
 
       setTracks(mapped);
     } catch (err: any) {
@@ -71,7 +81,11 @@ export const UserMusicScreen: FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useLayoutEffect(() => {
+    fetchUserMusic();
+  }, []);
 
   const handleTrackPress = (track: MusicTrack) => {
     if (track.locked) return;
@@ -84,45 +98,48 @@ export const UserMusicScreen: FC = () => {
     }
   };
 
-  const renderTrack = (track: MusicTrack) => {
-    const isSelected = selectedTrack?.id === track.id;
-    const showPlayIcon = isSelected && isPlaying;
+  const renderTrack = useCallback(
+    (track: MusicTrack) => {
+      const isSelected = selectedTrack?.id === track.id;
+      const showPlayIcon = isSelected && isPlaying;
 
-    return (
-      <TouchableOpacity
-        key={track.id}
-        style={styles.trackContainer}
-        onPress={() => handleTrackPress(track)}
-        activeOpacity={0.7}
-        disabled={!!track.locked}
-      >
-        <View style={styles.circleWrapper}>
-          <View style={styles.outerBorder}>
-            <View style={styles.innerBorder}>
-              <View
-                style={[
-                  styles.trackCircle,
-                  { backgroundColor: track.backgroundColor },
-                  isSelected && styles.selectedBorder,
-                ]}
-              >
-                {track.locked ? (
-                  <Ionicons name="lock-closed" size={28} color="white" />
-                ) : showPlayIcon ? (
-                  <Ionicons name="musical-notes" size={32} color="white" />
-                ) : null}
+      return (
+        <TouchableOpacity
+          key={track.id}
+          style={styles.trackContainer}
+          onPress={() => handleTrackPress(track)}
+          activeOpacity={0.7}
+          disabled={!!track.locked}
+        >
+          <View style={styles.circleWrapper}>
+            <View style={styles.outerBorder}>
+              <View style={styles.innerBorder}>
+                <View
+                  style={[
+                    styles.trackCircle,
+                    { backgroundColor: track.backgroundColor },
+                    isSelected && styles.selectedBorder,
+                  ]}
+                >
+                  {track.locked ? (
+                    <Ionicons name="lock-closed" size={28} color="white" />
+                  ) : showPlayIcon ? (
+                    <Ionicons name="musical-notes" size={32} color="white" />
+                  ) : null}
+                </View>
               </View>
             </View>
           </View>
-        </View>
-        <Text style={styles.trackName} numberOfLines={1}>
-          {track.name}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
+          <Text style={styles.trackName} numberOfLines={1}>
+            {track.name}
+          </Text>
+        </TouchableOpacity>
+      );
+    },
+    [selectedTrack, isPlaying]
+  );
 
-  const miniTitle = selectedTrack?.name || "";
+  const miniTitle = useMemo(() => selectedTrack?.name || "", [selectedTrack]);
 
   return (
     <View style={styles.container}>
@@ -137,6 +154,12 @@ export const UserMusicScreen: FC = () => {
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
           <Text style={{ color: "#dc2626" }}>{error}</Text>
+        </View>
+      ) : tracks.length === 0 ? (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <Text style={{ color: "#374151" }}>No tracks found</Text>
         </View>
       ) : (
         <ScrollView
